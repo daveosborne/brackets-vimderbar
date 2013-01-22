@@ -1,0 +1,38 @@
+#vimderbar {
+    padding: 1px;
+    padding-left: 0.7em;
+    background: #000;
+    color: #fff;
+}
+
+#mode .confirm {
+  color: #d62d47;
+}
+
+#command {
+    color: #fff;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: none;
+}
+
+#command:focus {
+    border: none !important;
+    /* doesn't work */
+}
+
+#command-info {
+  font-size: 0.9em;
+  color: #888;
+}
+
+#command-confirm {
+  color: #d62d47;
+}
+
+.cm-searching {
+    background: rgba(255, 255, 0, .4) !important;
+    /* doesn't work */
+}
