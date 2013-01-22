@@ -1,12 +1,12 @@
 # Vimderbar
 (a play on the German word _wunderbar_)  
 is an extension meant to bring vim-like functionality to Adobe's 
-[Brackets](www.brackets.io).
+[Brackets](://www.brackets.io).
 
-[!""](http://i.minus.com/icUlXjWzr6m1d.png)
+![""](http://i.minus.com/icUlXjWzr6m1d.png)
 
 Pretty much all of the Vim keymapping is from 
-[CodeMirror](www.codemirror.net)'s /keymap/vim.js, but I modified
+[CodeMirror](://www.codemirror.net)'s /keymap/vim.js, but I modified
 things very heavy-handedly. The two files will probably need to 
 be maintained in parallel until I can figure out a way to do this
 natively in Brackets.
@@ -42,6 +42,7 @@ Please use `cmd-c`/`ctrl-c` and `cmd-v`/`ctrl-v` instead.
 + Saving with `:w` can cause the cursor to jump to a higher part of the 
 file (inconsistently observed).
 + Funky indentation (tabs instead of spaces? not sure). 
++ `:` does not yet have "history" (e.g. pressing Up to get previous commands).
 
 ## Contributing
 Please do, by all means, hack on this extension. For coding conventions,
