@@ -1,12 +1,12 @@
 # Vimderbar
 (a play on the German word _wunderbar_)  
 is an extension meant to bring vim-like functionality to Adobe's 
-[Brackets](://www.brackets.io).
+[Brackets](http://brackets.io).
 
 ![""](http://i.minus.com/icUlXjWzr6m1d.png)
 
 Pretty much all of the Vim keymapping is from 
-[CodeMirror](://www.codemirror.net)'s /keymap/vim.js, but I modified
+[CodeMirror](http://codemirror.net)'s /keymap/vim.js, but I modified
 things very heavy-handedly. The two files will probably need to 
 be maintained in parallel until I can figure out a way to do this
 natively in Brackets.
