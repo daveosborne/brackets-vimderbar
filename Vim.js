@@ -1021,10 +1021,18 @@
         //     motionArgs to define behavior. Define separate entries for 'aw',
         //     'iw', 'a[', 'i[', etc.
         var inclusive = !motionArgs.textObjectInner;
+        console.log(motionArgs);
         if (!textObjects[character]) {
           // No text object defined for this, don't move.
           return null;
         }
+        
+        if (!inclusive && (character === "w" || character === "W")) {
+          // @ff. making changes to accomodate "diw" and "ciw".
+          // don't yet know what the potential consequences will be.
+          inclusive = true;
+        }
+        
         var tmp = textObjects[character](cm, inclusive);
         var start = tmp.start;
         var end = tmp.end;
@@ -1310,6 +1318,14 @@
         return expandWordUnderCursor(cm, inclusive,
             true /** forward */, true /** bigWord */);
       },
+      'iw': function(cm, inclusive) {
+        return expandWordUnderCursor(cm, false, true /** forward */,
+            false /** bigWord */);
+      },
+      'iW': function(cm, inclusive) {
+        return expandWordUnderCursor(cm, false,
+            true /** forward */, true /** bigWord */);
+      },
       '{': function(cm, inclusive) {
         return selectCompanionObject(cm, '}', inclusive);
       },
@@ -1514,7 +1530,9 @@
       if (wordBeforeRegex) {
         wordStart -= wordBeforeRegex[0].length;
       }
-
+      
+	  //inclusive = true;
+        
       if (inclusive) {
         wordEnd++;
       }
