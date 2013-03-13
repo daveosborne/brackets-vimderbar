@@ -1021,7 +1021,6 @@
         //     motionArgs to define behavior. Define separate entries for 'aw',
         //     'iw', 'a[', 'i[', etc.
         var inclusive = !motionArgs.textObjectInner;
-        console.log(motionArgs);
         if (!textObjects[character]) {
           // No text object defined for this, don't move.
           return null;
@@ -1318,14 +1317,6 @@
         return expandWordUnderCursor(cm, inclusive,
             true /** forward */, true /** bigWord */);
       },
-      'iw': function(cm, inclusive) {
-        return expandWordUnderCursor(cm, false, true /** forward */,
-            false /** bigWord */);
-      },
-      'iW': function(cm, inclusive) {
-        return expandWordUnderCursor(cm, false,
-            true /** forward */, true /** bigWord */);
-      },
       '{': function(cm, inclusive) {
         return selectCompanionObject(cm, '}', inclusive);
       },
@@ -1531,8 +1522,6 @@
         wordStart -= wordBeforeRegex[0].length;
       }
       
-	  //inclusive = true;
-        
       if (inclusive) {
         wordEnd++;
       }
