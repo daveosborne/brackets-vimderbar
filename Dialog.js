@@ -81,6 +81,6 @@
         // not yet implemented. Function is meant to display
         // characters pressed at the far right of the status bar
         // e.g. "13j" should be echoed in "#command-keys" as it is typed 
-        // so the user is aware of what he has already pressed
+        // so the user is aware of what he or she has already pressed
     };
 }());
