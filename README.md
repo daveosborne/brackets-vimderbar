@@ -12,16 +12,12 @@ be maintained in parallel until I can figure out a way to do this
 natively in Brackets.
 
 ## Installing Vimderbar
-0. Download the Vimderbar extension ("brackets-vimderbar") 
-folder.
-0. Run Brackets. 
-0. In the menu bar, navigate to 
-"Help > Show Extensions Folder".
-0. Place the previously downloaded "brackets-vimderbar" 
-folder into the "user" directory (you can delete this README file 
-if you'd like).
-0. Restart Brackets.
-0. Enable Vimderbar via Brackets' menu with "View > Enable Vimderbar".
+0. In the Brackets menu bar, choose **File > Extension Manager...** 
+(or click on the "brick" icon in the toolbar).
+0. Click the **Install from URL...** button at the bottom.
+0. Paste this extension's repo URL 
+(https://github.com/fontface/brackets-vimderbar) and click **Install**.
+0. Enable Vimderbar via the Brackets menu with **View > Enable Vimderbar**.
 
 ## Features
 + Basic vim keybindings (hjkl, yy, dd, p, P, o, O, gg, G, etc.).
