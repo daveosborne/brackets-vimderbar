@@ -67,8 +67,8 @@ define(function (require, exports, module) {
     };
     
     CodeMirror.commands.vimOpen = function (cm) {
-        setTimeout(function() {
-    		CommandManager.execute("navigate.quickOpen");
+        setTimeout(function () {
+			CommandManager.execute("navigate.quickOpen");
 		}, 200);
         // used to be "file.open" because quickOpen would automatically close
         // following the user's push of Enter key to submit Open command (":e[Enter]")

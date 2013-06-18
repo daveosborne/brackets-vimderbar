@@ -1,6 +1,6 @@
 #vimderbar {
     padding: 1px;
-    padding-left: 0.7em;
+    padding-left: 10px;
     background: #000;
     color: #fff;
     display: block;
@@ -9,7 +9,7 @@
 }
 
 #confirm {
-  color: #d62d47;
+	color: #d62d47;
 }
 
 #command {
@@ -22,22 +22,23 @@
     display: none;
 }
 
-#command-sign {
-
-}
-
 #command:focus {
     border: none;
     box-shadow: none;
 }
 
 #command-info {
-  font-size: 0.9em;
-  color: #888;
+    font-size: 0.9em;
+    color: #888;
 }
 
 #command-confirm {
-  color: #d62d47;
+	color: #d62d47;
+}
+
+#command-keys {
+    position: absolute;
+    right: 10px;
 }
 
 .cm-searching {

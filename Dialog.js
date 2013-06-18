@@ -13,14 +13,23 @@
     }
     
     CodeMirror.openVimDialog = function (template, shortText, callback, options, cm) {
-        if (shortText[0] === "/") {
+        var $dialog = $dialogDiv();
+        if (shortText === null) { // dealing with Macros
+            $dialog.children("#mode").html(template);
+            return function (closing) {
+                if (closing) {
+                    return false;
+                } else {
+                    return true;
+                }
+            };
+        } else if (shortText[0] === "/") {
             // "/" and "?" search used to be integrated with the Vim.js file and
             // the status bar, but I think the native Brackets search is much more
             // efficient. @ff.
             CommandManager.execute("edit.find");
             return;
         }
-        var $dialog = $dialogDiv();
         var closed = false, me = this;
         function close() {
             if (closed) {
@@ -101,10 +110,15 @@
   
     CodeMirror.updateVimDialogKeys = function (cm, key) {
         var $dialog = $dialogDiv();
-        $dialog.children("#command-keys").text(key);
-        // not yet implemented. Function is meant to display
+        $dialog.children("#command-keys").append(key);
+        // Function is meant to display
         // characters pressed at the far right of the status bar
         // e.g. "13j" should be echoed in "#command-keys" as it is typed 
-        // so the user is aware of what he or she has already pressed
+        // so the user is aware of what he or she is pressing
+    };
+    
+    CodeMirror.clearVimDialogKeys = function () {
+        var $dialog = $dialogDiv();
+        $dialog.children("#command-keys").text("");
     };
 }());

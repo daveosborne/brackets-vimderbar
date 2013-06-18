@@ -443,12 +443,13 @@
         isMacroPlaying: false,
         toggle: function(cm, registerName) {
           if (this.enteredMacroMode) { //onExit
-            this.enteredMacroMode(); // close dialog
+            this.enteredMacroMode(true); // close dialog // edited by @ff.
             this.enteredMacroMode = undefined;
           } else { //onEnter
             this.latestRegister = registerName;
-            this.enteredMacroMode = cm.openDialog(
-              '(recording)['+registerName+']', null, {bottom:true});
+            this.enteredMacroMode = CodeMirror.openVimDialog('(recording)['+registerName+']', null, {bottom:true});
+            /* this.enteredMacroMode = cm.openDialog(
+              '(recording)['+registerName+']', null, {bottom:true});*/ // removed by @ff
           }
         }
       };
@@ -543,11 +544,14 @@
       // This is the outermost function called by CodeMirror, after keys have
       // been mapped to their Vim equivalents.
       handleKey: function(cm, key) {
+        CodeMirror.updateVimDialogKeys(cm, key); // added by @ff.
         var command;
         var vim = getVimState(cm);
         var macroModeState = getVimGlobalState().macroModeState;
         if (macroModeState.enteredMacroMode) {
-          if (key == 'q') {
+          if (key === 'q') {
+            CodeMirror.clearVimDialogKeys(); // added by @ff.
+            CodeMirror.updateVimDialog("Normal"); // added by @ff.
             actions.exitMacroRecordMode();
             vim.inputState = new InputState();
             return;
@@ -559,6 +563,7 @@
           if (vim.visualMode) {
             exitVisualMode(cm, vim);
           }
+          CodeMirror.clearVimDialogKeys(); // added by @ff.
           return;
         }
         if (vim.visualMode &&
@@ -592,6 +597,7 @@
             logKey(macroModeState, key);
           }
           commandDispatcher.processCommand(cm, vim, command);
+          CodeMirror.clearVimDialogKeys(); // added by @ff.
         }
       }
     };

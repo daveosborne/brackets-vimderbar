@@ -25,18 +25,17 @@ natively in Brackets.
 + Very basic `:` commands. `:w` saves, `:q` closes the window,
 `:e` opens the "Navigate > Quick Open" menu.
 + Modes: Normal, Insert, Visual (Visual-line, too).
++ Vim bar echoes key presses in Normal & Visual modes so the user knows what
+has been pressed.
++ Macro functionality restored.
 
 ## Limitations
 + `:` commands are sloppy, only one can be performed at a single time.
 + Can't yet perform complex `:` commands (like `:1,8d`)
 + Reverse search (`?`) has been disabled to accommodate the native 
-search.
-+ Visual mode selection is kind of broken (visual line mode 
-seems to work fine).
-+ Can't yet yank or delete selected text using `yy` or `dd`. 
-Please use `cmd-c`/`ctrl-c` and `cmd-v`/`ctrl-v` instead.
-+ Saving with `:w` can cause the cursor to jump to a higher part of the 
-file (inconsistently observed).
+search. (please open an issue if you want this to be restored).
++ Can't yet yank or delete selected text using `yy` or `dd` (doesn't copy to 
+clipboard?). Please use `cmd-c`/`ctrl-c` and `cmd-v`/`ctrl-v` instead.
 + Funky indentation (tabs instead of spaces? not sure). 
 + `:` does not yet have "history" (e.g. pressing Up to get previous commands).
 
