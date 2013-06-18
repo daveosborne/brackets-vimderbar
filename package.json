@@ -3,6 +3,6 @@
   "title": "Vimderbar",
   "description": "Adds vim-like functionality & status bar to Brackets.",
   "homepage": "https://github.com/fontface/brackets-vimderbar",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "fontface (https://github.com/fontface)"
 }
