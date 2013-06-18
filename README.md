@@ -23,7 +23,7 @@ natively in Brackets.
 + Basic vim keybindings (hjkl, yy, dd, p, P, o, O, gg, G, etc.).
 + Search function (`/`) integrated with Brackets' native search.
 + Very basic `:` commands. `:w` saves, `:q` closes the window,
-`:e` opens the "File > Open..." menu.
+`:e` opens the "Navigate > Quick Open" menu.
 + Modes: Normal, Insert, Visual (Visual-line, too).
 
 ## Limitations
