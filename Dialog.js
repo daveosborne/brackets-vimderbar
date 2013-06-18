@@ -12,7 +12,7 @@
         return $vimderbar;
     }
     
-    CodeMirror.openVimDialog = function (template, shortText, callback, option, cm) {
+    CodeMirror.openVimDialog = function (template, shortText, callback, options, cm) {
         if (shortText[0] === "/") {
             // "/" and "?" search used to be integrated with the Vim.js file and
             // the status bar, but I think the native Brackets search is much more
@@ -37,13 +37,15 @@
         $dialog.children("#mode").hide();
 		$dialog.children("#confirm").hide();
         $inp.bind("keydown", function (e) {
-            if (e.keyCode === 13 || e.keyCode === 27) {
+            var keyName = CodeMirror.keyName(e);
+            if (e.keyCode === 13 || keyName === "Enter") {
                 e.stopPropagation();
-                if (e.keyCode === 13) {
-                    var commandVal = $inp.val();
-                    callback(commandVal);
-                    cm.focus();
-                }
+                var commandVal = $inp.val();
+                callback(commandVal);
+                cm.focus();
+            } else if (keyName === "Esc" || keyName === "Ctrl-C" || keyName === "Ctrl-[") {
+                e.stopPropagation();
+				cm.focus();
             }
         });
         $inp.blur(function () {
@@ -55,6 +57,7 @@
             if (!$dialog.children("#confirm").is(":visible")) { // if #confirm hidden, show mode
 				$dialog.children("#mode").show();
             }
+            cm.focus(); // focus on cm in case the user changes windows or applications.
         });
         return close;
     };
