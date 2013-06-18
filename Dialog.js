@@ -40,7 +40,8 @@
             if (e.keyCode === 13 || e.keyCode === 27) {
                 e.stopPropagation();
                 if (e.keyCode === 13) {
-                    callback($inp.val());
+                    var commandVal = $inp.val();
+                    callback(commandVal);
                     cm.focus();
                 }
             }
@@ -51,7 +52,7 @@
             $inp.hide();
             $dialog.children("#command-sign").text("");
             $dialog.children("#command-info").text("");
-            if (!$dialog.children("#confirm").is(":visible")) {
+            if (!$dialog.children("#confirm").is(":visible")) { // if #confirm hidden, show mode
 				$dialog.children("#mode").show();
             }
         });
@@ -63,6 +64,7 @@
 		$dialog.children("#confirm").show();
         $dialog.children("#confirm").text(template);
         $dialog.children("#mode").hide();
+        cm.focus();
     };
   
 	CodeMirror.hideVimConfirm = function (callbacks, cm) {
@@ -73,6 +75,7 @@
     
     CodeMirror.updateVimDialog = function (mode) {
         var $dialog = $dialogDiv();
+        $dialog.children("#mode").show();
 		$dialog.children("#confirm").hide();
         $dialog.children("#mode").text("-- " + mode + " --");
     };

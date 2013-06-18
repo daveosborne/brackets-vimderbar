@@ -62,13 +62,17 @@ define(function (require, exports, module) {
   
     CodeMirror.commands.vimClose = function (cm) {
         CommandManager.execute("file.close");
+        var $vimderbar = $("#vimderbar");
+        $vimderbar.children("#command").blur();
     };
     
     CodeMirror.commands.vimOpen = function (cm) {
-        CommandManager.execute("file.open");
-        // should it be "navigate.quickOpen"? 
-        // Ran into trouble with quickOpen 
-        // (auto focus into editor after ex command overrides qO). @ff. 
+        setTimeout(function() {
+    		CommandManager.execute("navigate.quickOpen");
+		}, 200);
+        // used to be "file.open" because quickOpen would automatically close
+        // following the user's push of Enter key to submit Open command (":e[Enter]")
+        // setTimeout meant to give the user a moment to let go of the Enter key.
     };
     
     function _enableVimderbar(editor) {
