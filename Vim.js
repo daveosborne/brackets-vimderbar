@@ -544,7 +544,6 @@
       // This is the outermost function called by CodeMirror, after keys have
       // been mapped to their Vim equivalents.
       handleKey: function(cm, key) {
-        CodeMirror.updateVimDialogKeys(cm, key); // added by @ff.
         var command;
         var vim = getVimState(cm);
         var macroModeState = getVimGlobalState().macroModeState;
@@ -579,6 +578,10 @@
         if (key != '0' || (key == '0' && vim.inputState.getRepeat() === 0)) {
           // Have to special case 0 since it's both a motion and a number.
           command = commandDispatcher.matchCommand(key, defaultKeymap, vim);
+        } else if (key === '0') { // else added by @ff
+            // make sure the 0 appears in the keys dialog for repeat counter
+            // e.g. 10j, 50>>, etc.
+            CodeMirror.updateVimDialogKeys(key); // added by @ff
         }
         if (!command) {
           if (isNumber(key)) {
@@ -597,7 +600,7 @@
             logKey(macroModeState, key);
           }
           commandDispatcher.processCommand(cm, vim, command);
-          CodeMirror.clearVimDialogKeys(); // added by @ff.
+          // CodeMirror.clearVimDialogKeys(); // added by @ff.
         }
       }
     };
@@ -754,6 +757,7 @@
 
     var commandDispatcher = {
       matchCommand: function(key, keyMap, vim) {
+        CodeMirror.updateVimDialogKeys(key); // added by @ff
         var inputState = vim.inputState;
         var keys = inputState.keyBuffer.concat(key);
         for (var i = 0; i < keyMap.length; i++) {
@@ -774,6 +778,7 @@
               // Matches whole comand. Return the command.
               if (command.keys[keys.length - 1] == 'character') {
                 inputState.selectedCharacter = keys[keys.length - 1];
+                CodeMirror.clearVimDialogKeys(); // added by @ff.
                 if(inputState.selectedCharacter.length>1){
                   switch(inputState.selectedCharacter){
                     case "<CR>":
@@ -810,13 +815,16 @@
             break;
           case 'action':
             this.processAction(cm, vim, command);
+            CodeMirror.clearVimDialogKeys(); // added by @ff.
             break;
           case 'search':
             this.processSearch(cm, vim, command);
+            CodeMirror.clearVimDialogKeys(); // added by @ff.
             break;
           case 'ex':
           case 'keyToEx':
             this.processEx(cm, vim, command);
+            CodeMirror.clearVimDialogKeys(); // added by @ff.
             break;
           default:
             break;
@@ -1017,6 +1025,7 @@
       evalInput: function(cm, vim) {
         // If the motion comand is set, execute both the operator and motion.
         // Otherwise return.
+        CodeMirror.clearVimDialogKeys(); // added by @ff.
         var inputState = vim.inputState;
         var motion = inputState.motion;
         var motionArgs = inputState.motionArgs || {};

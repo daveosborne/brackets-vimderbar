@@ -33,7 +33,7 @@ has been pressed.
 + `:` commands are sloppy, only one can be performed at a single time.
 + Can't yet perform complex `:` commands (like `:1,8d`)
 + Reverse search (`?`) has been disabled to accommodate the native 
-search. (please open an issue if you want this to be restored).
+search. (Please open an issue if you want this to be restored.)
 + Can't yet yank or delete selected text using `yy` or `dd` (doesn't copy to 
 clipboard?). Please use `cmd-c`/`ctrl-c` and `cmd-v`/`ctrl-v` instead.
 + Funky indentation (tabs instead of spaces? not sure). 

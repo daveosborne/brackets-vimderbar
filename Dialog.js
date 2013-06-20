@@ -108,7 +108,10 @@
         }
     };
   
-    CodeMirror.updateVimDialogKeys = function (cm, key) {
+    CodeMirror.updateVimDialogKeys = function (key, cm) {
+        if (key === "?") {
+            return;
+        }
         var $dialog = $dialogDiv();
         $dialog.children("#command-keys").append(key);
         // Function is meant to display
