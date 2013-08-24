@@ -21,7 +21,7 @@
  */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, brackets, $, Mustache, CodeMirror, _showVimderbar, setTimeout */
+/*global define, brackets, $, Mustache, CodeMirror, _showVimderbar, setTimeout, localStorage */
 
 define(function (require, exports, module) {
     "use strict";
@@ -34,7 +34,9 @@ define(function (require, exports, module) {
         KeyBindingManager   = brackets.getModule("command/KeyBindingManager"),
         Menus               = brackets.getModule("command/Menus"),
         PreferencesManager  = brackets.getModule("preferences/PreferencesManager"),
+        AppInit             = brackets.getModule("utils/AppInit"),
         Resizer             = brackets.getModule("utils/Resizer");
+        //Vim2				= brackets.getModule("thirdparty/CodeMirror");
 
     // import the CodeMirror vim keymap. Should figure out how to get it
     // from the source. The current method requires a manual update of
@@ -51,7 +53,7 @@ define(function (require, exports, module) {
         defaultPrefs        = { height: 5 },
         vimActive           = false;
     
-    var oldKeys;
+    var oldKeys, $vimderbar;
     
     CodeMirror.commands.vimSave = function (cm) {
         cm.save = CommandManager.execute("file.save");
@@ -62,7 +64,6 @@ define(function (require, exports, module) {
   
     CodeMirror.commands.vimClose = function (cm) {
         CommandManager.execute("file.close");
-        var $vimderbar = $("#vimderbar");
         $vimderbar.children("#command").blur();
     };
     
@@ -76,7 +77,6 @@ define(function (require, exports, module) {
     };
     
     function _enableVimderbar(editor) {
-        var $vimderbar = $("#vimderbar");
         // output Normal mode in 
         $vimderbar.children("#mode").text("-- Normal --");
         
@@ -99,27 +99,26 @@ define(function (require, exports, module) {
     
     function _handleShowHideVimderbar() {
         var activeEditor = EditorManager.getActiveEditor();
-        
-        var $vimderbar = $("#vimderbar");
-        
-        if ($vimderbar.css("display") === "none") {
+
+        if (vimActive === false) {
             $vimderbar.show();
             CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
             _enableVimderbar(activeEditor);
             vimActive = true;
+            localStorage.vimderbarOn = true;
         } else {
             $vimderbar.hide();
             CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
             _disableVimderbar(activeEditor);
             vimActive = false;
+            localStorage.vimderbarOn = false;
         }
         EditorManager.resizeEditor();
     }
     
     
     function init() {
-        var $vimderbarPanel,
-            s,
+        var s,
             view_menu;
         
         ExtensionUtils.loadStyleSheet(module, "vimderbar.css");
@@ -135,16 +134,22 @@ define(function (require, exports, module) {
         s = Mustache.render(panelHtml);
         $(".content").append(s);
         // keep vimderbar off by default
-        $vimderbarPanel = $("#vimderbar");
-        $vimderbarPanel.hide();
+        $vimderbar = $("#vimderbar");
+        $vimderbar.hide();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
     }
     
-    init();
-    setTimeout(function () {
-        // get the default Brackets "extraKeys" so we don't overwrite the settings
+    AppInit.htmlReady(function () {
+        init();
+    });
+    
+    AppInit.appReady(function () {
         oldKeys = EditorManager.getActiveEditor()._codeMirror.getOption("extraKeys");
-    }, 1000); // need to wait ~1 second before we can access getActiveEditor();
+                
+        if (localStorage.vimderbarOn === "true") {
+            _handleShowHideVimderbar();
+        }
+    });
     
     // keep an eye on document changing so that the vim keyMap will apply to all files in the window
     $(DocumentManager).on("currentDocumentChange", function () {

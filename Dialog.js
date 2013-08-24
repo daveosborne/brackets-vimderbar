@@ -66,7 +66,6 @@
             if (!$dialog.children("#confirm").is(":visible")) { // if #confirm hidden, show mode
 				$dialog.children("#mode").show();
             }
-            cm.focus(); // focus on cm in case the user changes windows or applications.
         });
         return close;
     };
