@@ -34,8 +34,6 @@ has been pressed.
 + Can't yet perform complex `:` commands (like `:1,8d`)
 + Reverse search (`?`) has been disabled to accommodate the native 
 search. (Please open an issue if you want this to be restored.)
-+ Can't yet yank or delete selected text using `yy` or `dd` (doesn't copy to 
-clipboard?). Please use `cmd-c`/`ctrl-c` and `cmd-v`/`ctrl-v` instead.
 + Funky indentation (tabs instead of spaces? not sure). 
 + `:` does not yet have "history" (e.g. pressing Up to get previous commands).
 
