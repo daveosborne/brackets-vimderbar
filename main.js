@@ -35,15 +35,23 @@ define(function (require, exports, module) {
         Menus               = brackets.getModule("command/Menus"),
         PreferencesManager  = brackets.getModule("preferences/PreferencesManager"),
         AppInit             = brackets.getModule("utils/AppInit"),
+        Vim,
+        VimFix,
+        Dialog              = require("Dialog"),
+        SearchCursor,
         Resizer             = brackets.getModule("utils/Resizer");
-        //Vim2				= brackets.getModule("thirdparty/CodeMirror");
-
-    // import the CodeMirror vim keymap. Should figure out how to get it
-    // from the source. The current method requires a manual update of
-    // Vim.js (which has now been altered)
-    var Dialog          = require("Dialog"),
-        SearchCursor    = require("SearchCursor"),
-        Vim             = require("Vim");
+    
+    // import vim keymap from brackets source. once loaded, import vim fixes.
+    // vim fixes are too complex at the moment. continue manually updating vim.js
+    // for now.
+    /*brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function (vim) {
+        Vim = vim;
+        VimFix = require("VimFix")(CodeMirror.Vim);
+    });*/
+    brackets.libRequire(["thirdparty/CodeMirror2/addon/search/searchcursor"], function (sc) {
+        SearchCursor = sc;
+    });
+    Vim = require("Vim");
 
     var panelHtml           = require("text!templates/bottom-panel.html"),
         TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar",
