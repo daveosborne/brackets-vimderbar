@@ -12,6 +12,10 @@
 	color: #d62d47;
 }
 
+#mode {
+    text-transform: capitalize;
+}
+
 #command {
     color: #fff;
     border: none;

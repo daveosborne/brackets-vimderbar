@@ -5,7 +5,8 @@
 (function () {
     "use strict";
     
-    var CommandManager = brackets.getModule("command/CommandManager");
+    var CommandManager = brackets.getModule("command/CommandManager"),
+        EditorManager = brackets.getModule("editor/EditorManager");
     
     function $dialogDiv(cm, template, option) {
         var $vimderbar = $("#vimderbar");
@@ -48,12 +49,16 @@
         $inp.bind("keydown", function (e) {
             var keyName = CodeMirror.keyName(e);
             if (e.keyCode === 13 || keyName === "Enter") {
-                e.stopPropagation();
+                CodeMirror.e_stop(e);
                 var commandVal = $inp.val();
+                if (cm.hasOwnProperty("focus")) {
+                    cm.focus();
+                } else {
+                    $inp.blur();
+                }
                 callback(commandVal);
-                cm.focus();
             } else if (keyName === "Esc" || keyName === "Ctrl-C" || keyName === "Ctrl-[") {
-                e.stopPropagation();
+                CodeMirror.e_stop(e);
 				cm.focus();
             }
         });
@@ -122,5 +127,15 @@
     CodeMirror.clearVimDialogKeys = function () {
         var $dialog = $dialogDiv();
         $dialog.children("#command-keys").text("");
+    };
+    
+    CodeMirror.watchVimMode = function (cm) {
+        if (cm === undefined) {
+            cm = EditorManager.getCurrentFullEditor()._codeMirror;
+        }
+        cm.on("vim-mode-change", function (event) {
+            var mode = event.mode;
+            CodeMirror.updateVimDialog(mode);
+        });
     };
 }());

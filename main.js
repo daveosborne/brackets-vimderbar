@@ -20,8 +20,8 @@
  * 
  */
 
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, brackets, $, Mustache, CodeMirror, _showVimderbar, setTimeout, localStorage */
+/*jslint plusplus: true, devel: true, nomen: true, indent: 4, browser: true, maxerr: 50 */
+/*global define, brackets, $, jQuery, Mustache, CodeMirror, localStorage */
 
 define(function (require, exports, module) {
     "use strict";
@@ -33,17 +33,26 @@ define(function (require, exports, module) {
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
         KeyBindingManager   = brackets.getModule("command/KeyBindingManager"),
         Menus               = brackets.getModule("command/Menus"),
-        PreferencesManager  = brackets.getModule("preferences/PreferencesManager"),
         AppInit             = brackets.getModule("utils/AppInit"),
         Vim,
         VimFix,
         Dialog              = require("Dialog"),
         SearchCursor,
-        Resizer             = brackets.getModule("utils/Resizer");
+        Resizer             = brackets.getModule("utils/Resizer"),
+        panelHtml           = require("text!templates/bottom-panel.html"),
+        TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar",
+        VIMDERBAR_PREFS_ID  = "fontface.show-vimderbar.prefs",
+        keyList             = [],
+        loaded              = false,
+        HEADER_HEIGHT       = 5,
+        defaultPrefs        = { height: 5 },
+        vimActive           = false,
+        oldKeys,
+        $vimderbar;
     
     // import vim keymap from brackets source. once loaded, import vim fixes.
-    // vim fixes are too complex at the moment. continue manually updating vim.js
-    // for now.
+    // vim fixes are too complex at the moment. perhaps even impossible. 
+    // continue manually updating vim.js for now.
     /*brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function (vim) {
         Vim = vim;
         VimFix = require("VimFix")(CodeMirror.Vim);
@@ -52,27 +61,24 @@ define(function (require, exports, module) {
         SearchCursor = sc;
     });
     Vim = require("Vim");
-
-    var panelHtml           = require("text!templates/bottom-panel.html"),
-        TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar",
-        keyList             = [],
-        loaded              = false,
-        HEADER_HEIGHT       = 5,
-        defaultPrefs        = { height: 5 },
-        vimActive           = false;
-    
-    var oldKeys, $vimderbar;
     
     CodeMirror.commands.vimSave = function (cm) {
         cm.save = CommandManager.execute("file.save");
         CommandManager.execute("file.save");
         // I'm not sure I understand why calling this twice 
-        // is the only way to get the save to work. @ff.
+        // is the only way to get the save to work.
     };
   
     CodeMirror.commands.vimClose = function (cm) {
-        CommandManager.execute("file.close");
-        $vimderbar.children("#command").blur();
+        var hostEditor = EditorManager.getCurrentFullEditor(),
+            inlineFocused = EditorManager.getFocusedInlineWidget();
+        if (inlineFocused) {
+            // inline editor exists & is in focus. close it.
+            EditorManager.closeInlineWidget(hostEditor, inlineFocused);
+        } else {
+            // no inline editor is in focus so just close the document.
+            CommandManager.execute("file.close");
+        }
     };
     
     CodeMirror.commands.vimOpen = function (cm) {
@@ -85,10 +91,8 @@ define(function (require, exports, module) {
     };
     
     function _enableVimderbar(editor) {
-        // output Normal mode in 
-        $vimderbar.children("#mode").text("-- Normal --");
-        
         if (editor !== null) {
+            CodeMirror.watchVimMode(editor._codeMirror);
             // I know that _codeMirror is deprecated, but I couldn't get
             // this to work in any other way. Will continue to investigate.
             editor._codeMirror.setOption("extraKeys", null);
@@ -109,17 +113,25 @@ define(function (require, exports, module) {
         var activeEditor = EditorManager.getActiveEditor();
 
         if (vimActive === false) {
+            // turn vim on
             $vimderbar.show();
             CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
+            CodeMirror.updateVimDialog("Normal");
             _enableVimderbar(activeEditor);
             vimActive = true;
             localStorage.vimderbarOn = true;
+            VimFix = require("VimFix")(EditorManager,
+                                       {enable: _enableVimderbar,
+                                        disable: _disableVimderbar},
+                                        DocumentManager);
         } else {
+            // turn vim off
             $vimderbar.hide();
             CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
             _disableVimderbar(activeEditor);
             vimActive = false;
             localStorage.vimderbarOn = false;
+            $(EditorManager).trigger({type: "vimderbarDisabled"});
         }
         EditorManager.resizeEditor();
     }
@@ -163,6 +175,7 @@ define(function (require, exports, module) {
     $(DocumentManager).on("currentDocumentChange", function () {
         var activeEditor = EditorManager.getActiveEditor();
         if (vimActive === true) {
+            CodeMirror.updateVimDialog("Normal");
             _enableVimderbar(activeEditor);
         } else {
             _disableVimderbar(activeEditor);

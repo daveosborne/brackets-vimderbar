@@ -40,6 +40,10 @@
  *   TODO: Implement the remaining special marks. They have more complex
  *       behavior.
  *
+ * Events:
+ *  'vim-mode-change' - raised on the editor anytime the current mode changes,
+ *                      Event object: {mode: "visual", subMode: "linewise"}
+ *
  * Code structure:
  *  1. Default keymap
  *  2. Variable declarations and short basic helpers
@@ -320,6 +324,7 @@
     CodeMirror.defineOption('vimMode', false, function(cm, val) {
       if (val) {
         cm.setOption('keyMap', 'vim');
+        CodeMirror.signal(cm, "vim-mode-change", {mode: "normal"});
         cm.on('beforeSelectionChange', beforeSelectionChange);
         maybeInitVimState(cm);
       } else if (cm.state.vim) {
@@ -585,6 +590,7 @@
             !cursorEqual(cm.getCursor('head'), cm.getCursor('anchor'))) {
           vim.visualMode = true;
           vim.visualLine = false;
+          CodeMirror.signal(cm, "vim-mode-change", {mode: "visual"});
           cm.on('mousedown', exitVisualMode);
         }
         if (key != '0' || (key == '0' && vim.inputState.getRepeat() === 0)) {
@@ -1676,10 +1682,10 @@
           // Handle Replace-mode as a special case of insert mode.
           cm.toggleOverwrite(true);
           cm.setOption('keyMap', 'vim-replace');
-          CodeMirror.updateVimDialog("Replace"); // using CodeMirror, @ff
+          CodeMirror.signal(cm, "vim-mode-change", {mode: "replace"});
         } else {
           cm.setOption('keyMap', 'vim-insert');
-          CodeMirror.updateVimDialog("Insert"); // using CodeMirror, @ff
+          CodeMirror.signal(cm, "vim-mode-change", {mode: "insert"});
         }
         if (!vimGlobalState.macroModeState.inReplay) {
           // Only record if not replaying.
@@ -1699,7 +1705,6 @@
           cm.on('mousedown', exitVisualMode);
           vim.visualMode = true;
           vim.visualLine = !!actionArgs.linewise;
-          CodeMirror.updateVimDialog("Visual"); // using CodeMirror, @ff
           if (vim.visualLine) {
             curStart.ch = 0;
             curEnd = clipCursorToContent(cm, {
@@ -1722,6 +1727,7 @@
           } else {
             cm.setSelection(curStart, curEnd);
           }
+          CodeMirror.signal(cm, "vim-mode-change", {mode: "visual", subMode: vim.visualLine ? "linewise" : ""});
         } else {
           curStart = cm.getCursor('anchor');
           curEnd = cm.getCursor('head');
@@ -1729,17 +1735,17 @@
             // Shift-V pressed in characterwise visual mode. Switch to linewise
             // visual mode instead of exiting visual mode.
             vim.visualLine = true;
-            CodeMirror.updateVimDialog("Visual"); // using CodeMirror, @ff
             curStart.ch = cursorIsBefore(curStart, curEnd) ? 0 :
                 lineLength(cm, curStart.line);
             curEnd.ch = cursorIsBefore(curStart, curEnd) ?
                 lineLength(cm, curEnd.line) : 0;
             cm.setSelection(curStart, curEnd);
+            CodeMirror.signal(cm, "vim-mode-change", {mode: "visual", subMode: "linewise"});
           } else if (vim.visualLine && !actionArgs.linewise) {
             // v pressed in linewise visual mode. Switch to characterwise visual
             // mode instead of exiting visual mode.
             vim.visualLine = false;
-            CodeMirror.updateVimDialog("Visual"); // using CodeMirror, @ff
+            CodeMirror.signal(cm, "vim-mode-change", {mode: "visual"});
           } else {
             exitVisualMode(cm);
           }
@@ -2044,7 +2050,6 @@
       var vim = cm.state.vim;
       vim.visualMode = false;
       vim.visualLine = false;
-      CodeMirror.updateVimDialog("Normal"); // using CodeMirror, @ff
       var selectionStart = cm.getCursor('anchor');
       var selectionEnd = cm.getCursor('head');
       if (!cursorEqual(selectionStart, selectionEnd)) {
@@ -2053,6 +2058,7 @@
         // it's not supposed to be.
         cm.setCursor(clipCursorToContent(cm, selectionEnd));
       }
+      CodeMirror.signal(cm, "vim-mode-change", {mode: "normal"});
     }
 
     // Remove any trailing newlines from the selection. For
@@ -2891,8 +2897,6 @@
     var defaultExCommandMap = [
       { name: 'map', type: 'builtIn' },
       { name: 'write', shortName: 'w', type: 'builtIn' },
-      { name: 'quit', shortName: 'q', type: 'builtIn'}, // added by @ff
-      { name: 'edit', shortName: 'e', type: 'builtIn'}, // added by @ff
       { name: 'undo', shortName: 'u', type: 'builtIn' },
       { name: 'redo', shortName: 'red', type: 'builtIn' },
       { name: 'sort', shortName: 'sor', type: 'builtIn'},
@@ -3237,21 +3241,14 @@
       redo: CodeMirror.commands.redo,
       undo: CodeMirror.commands.undo,
       write: function(cm) {
-        if (CodeMirror.commands.vimSave) {
-          // If a save command is defined, call it. (modified ".save" to ".vimSave" -@ff)
-          CodeMirror.commands.vimSave(cm);
-        } // else removed by @ff
+        if (CodeMirror.commands.save) {
+          // If a save command is defined, call it.
+          CodeMirror.commands.save(cm);
+        } else {
+          // Saves to text area if no save command is defined.
+          cm.save();
+        }
       },
-      quit: function(cm) {
-        if (CodeMirror.commands.vimClose) {
-          CodeMirror.commands.vimClose(cm);
-        }
-      }, // added by @ff
-      edit: function(cm) {
-        if (CodeMirror.commands.vimOpen) {
-          CodeMirror.commands.vimOpen(cm);
-        }
-      }, // added by @ff
       nohlsearch: function(cm) {
         clearSearchHighlight(cm);
       },
@@ -3497,8 +3494,8 @@
       cm.setCursor(cm.getCursor().line, cm.getCursor().ch-1, true);
       vim.insertMode = false;
       cm.setOption('keyMap', 'vim');
-      CodeMirror.updateVimDialog("Normal"); // using CodeMirror, @ff
       cm.toggleOverwrite(false); // exit replace mode if we were in it.
+      CodeMirror.signal(cm, "vim-mode-change", {mode: "normal"});
     }
 
     CodeMirror.keyMap['vim-insert'] = {

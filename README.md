@@ -1,6 +1,6 @@
 # Vimderbar
 (a play on the German word _wunderbar_)  
-is an extension meant to bring vim-like functionality to Adobe's 
+is an extension meant to bring vim-like functionality to 
 [Brackets](http://brackets.io).
 
 ![""](http://i.minus.com/icUlXjWzr6m1d.png)
@@ -22,20 +22,20 @@ natively in Brackets.
 ## Features
 + Basic vim keybindings (hjkl, yy, dd, p, P, o, O, gg, G, etc.).
 + Search function (`/`) integrated with Brackets' native search.
-+ Very basic `:` commands. `:w` saves, `:q` closes the window,
-`:e` opens the "Navigate > Quick Open" menu.
++ Very basic `:` commands. `:w` saves, `:q` closes the document or the inline 
+editor in focus, and `:e` opens the "Navigate > Quick Open" menu.
++ Inline editor support. Double-tap `Esc` to close an inline editor. 
 + Modes: Normal, Insert, Visual (Visual-line, too).
-+ Vim bar echoes key presses in Normal & Visual modes so the user knows what
++ Vim bar displays command presses in Normal & Visual modes so the user knows what
 has been pressed.
 + Macro functionality restored.
 
 ## Limitations
 + `:` commands are sloppy, only one can be performed at a single time.
-+ Can't yet perform complex `:` commands (like `:1,8d`)
++ Can't yet perform complex `:` commands (like `:1,8d` or even `:wq`).
++ `:` does not yet have "history" (e.g. pressing Up to get previous commands).
 + Reverse search (`?`) has been disabled to accommodate the native 
 search. (Please open an issue if you want this to be restored.)
-+ Funky indentation (tabs instead of spaces? not sure). 
-+ `:` does not yet have "history" (e.g. pressing Up to get previous commands).
 
 ## Contributing
 Please do, by all means, hack on this extension. For coding conventions,
