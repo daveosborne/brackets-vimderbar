@@ -10,7 +10,8 @@
 }
 
 #confirm {
-	color: #d62d47;
+	color: #FF7B7B;
+    text-shadow: none;
 }
 
 #mode {
@@ -19,12 +20,16 @@
 
 #command {
     color: #fff;
+    color: #8fddff;
     border: none;
     background: transparent;
     padding: 0;
     margin: 0;
-    margin-top: -3px;
+    margin-top: -1px;
+    margin-left: -1px;
     display: none;
+    font-weight: 300;
+    font-size: inherit;
 }
 
 #command:focus {
@@ -48,5 +53,5 @@
 
 .cm-searching {
     background: rgba(255, 255, 0, .4) !important;
-    /* doesn't work */
+    /* doesn't work ?*/
 }
