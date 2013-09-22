@@ -2,8 +2,8 @@
   "name": "fontface.brackets-vimderbar",
   "title": "Vimderbar",
   "description": "Adds vim-like functionality & status bar to Brackets.",
-  "homepage": "https://github.com/fontface/brackets-vimderbar",
+  "homepage": "https://github.com/websigh/brackets-vimderbar",
   "version": "0.4.4",
-  "author": "fontface (https://github.com/fontface)",
+  "author": "websigh (https://github.com/websigh)",
   "license": "MIT/WTFPL"
 }
