@@ -13,10 +13,8 @@ natively in Brackets.
 
 ## Installing Vimderbar
 0. In the Brackets menu bar, choose **File > Extension Manager...** 
-(or click on the "brick" icon in the toolbar).
-0. Click the **Install from URL...** button at the bottom.
-0. Paste this extension's repo URL 
-(https://github.com/fontface/brackets-vimderbar) and click **Install**.
+(or click on the "brick" icon in the sidebar to the right).
+0. Click the **Available** tab and search for **Vimderbar**
 0. Enable Vimderbar via the Brackets menu with **View > Enable Vimderbar**.
 
 ## Features
