@@ -23,7 +23,6 @@ define(function () {
         //    (open inline editor in normal mode. press i from within the inline editor.
         //     notice that the cursor remains "fat".) 
         //    fixing this bug will likely fix the visual mode bug described below.
-        // 2. it feels like lag accumulates with each ":w" save. look into this.
 
         /**
         ** solve the inline-editor dilemma

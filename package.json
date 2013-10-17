@@ -3,7 +3,7 @@
   "title": "Vimderbar",
   "description": "Adds vim-like functionality & status bar to Brackets.",
   "homepage": "https://github.com/websigh/brackets-vimderbar",
-  "version": "0.4.4",
+  "version": "0.4.9",
   "author": "websigh (https://github.com/websigh)",
   "license": "MIT/WTFPL"
 }
