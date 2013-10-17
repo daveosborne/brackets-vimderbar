@@ -31,14 +31,12 @@ define(function (require, exports, module) {
         DocumentManager     = brackets.getModule("document/DocumentManager"),
         EditorManager       = brackets.getModule("editor/EditorManager"),
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
-        KeyBindingManager   = brackets.getModule("command/KeyBindingManager"),
         Menus               = brackets.getModule("command/Menus"),
         AppInit             = brackets.getModule("utils/AppInit"),
         Vim,
         VimFix,
         Dialog              = require("Dialog"),
         SearchCursor,
-        Resizer             = brackets.getModule("utils/Resizer"),
         panelHtml           = require("text!templates/bottom-panel.html"),
         TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar",
         VIMDERBAR_PREFS_ID  = "fontface.show-vimderbar.prefs",
@@ -63,10 +61,7 @@ define(function (require, exports, module) {
     Vim = require("Vim");
     
     CodeMirror.commands.vimSave = function (cm) {
-        cm.save = CommandManager.execute("file.save");
         CommandManager.execute("file.save");
-        // I'm not sure I understand why calling this twice 
-        // is the only way to get the save to work.
     };
   
     CodeMirror.commands.vimClose = function (cm) {
@@ -157,6 +152,8 @@ define(function (require, exports, module) {
         $vimderbar = $("#vimderbar");
         $vimderbar.hide();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
+
+        Dialog.init();
     }
     
     AppInit.htmlReady(function () {
