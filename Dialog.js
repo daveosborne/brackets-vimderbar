@@ -46,7 +46,7 @@
         // $dialog.children("#command-info").text(template.commandInfo); // deprecated?
         $dialog.children("#mode").hide();
 		$dialog.children("#confirm").hide();
-        $inp.bind("keydown", function (e) {
+        $inp.on("keydown.vimderbar", function (e) {
             var keyName = CodeMirror.keyName(e);
             if (e.keyCode === 13 || keyName === "Enter") {
                 CodeMirror.e_stop(e);
@@ -62,7 +62,7 @@
 				cm.focus();
             }
         });
-        $inp.blur(function () {
+        $inp.one("blur", function () {
             // clear the input box on blur
             $inp.val("");
             $inp.hide();
@@ -71,6 +71,7 @@
             if (!$dialog.children("#confirm").is(":visible")) { // if #confirm hidden, show mode
 				$dialog.children("#mode").show();
             }
+            $inp.off(".vimderbar");
         });
         return close;
     };
