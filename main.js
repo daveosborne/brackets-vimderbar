@@ -63,10 +63,7 @@ define(function (require, exports, module) {
     Vim = require("Vim");
     
     CodeMirror.commands.vimSave = function (cm) {
-        cm.save = CommandManager.execute("file.save");
         CommandManager.execute("file.save");
-        // I'm not sure I understand why calling this twice 
-        // is the only way to get the save to work.
     };
   
     CodeMirror.commands.vimClose = function (cm) {
