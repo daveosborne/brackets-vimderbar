@@ -154,6 +154,8 @@ define(function (require, exports, module) {
         $vimderbar = $("#vimderbar");
         $vimderbar.hide();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
+
+        Dialog.init();
     }
     
     AppInit.htmlReady(function () {

@@ -2,19 +2,48 @@
 /*global define, $, CodeMirror, setTimeout, brackets */
 
 // Open simple dialogs on top of an editor. Relies on dialog.css.
-(function () {
+define(function (require, exports, module) {
     "use strict";
     
     var CommandManager = brackets.getModule("command/CommandManager"),
         EditorManager = brackets.getModule("editor/EditorManager");
     
-    function $dialogDiv(cm, template, option) {
-        var $vimderbar = $("#vimderbar");
-        return $vimderbar;
+    var cm, callback;
+    var $dialog, $inp;
+
+    function init() {
+        $dialog = $("#vimderbar");
+        $inp = $dialog.children("#command");
+        $inp.on("keydown", function (e) {
+            var keyName = CodeMirror.keyName(e);
+            if (e.keyCode === 13 || keyName === "Enter") {
+                CodeMirror.e_stop(e);
+                var commandVal = $inp.val();
+                if (cm.hasOwnProperty("focus")) {
+                    cm.focus();
+                } else {
+                    $inp.blur();
+                }
+                callback(commandVal);
+            } else if (keyName === "Esc" || keyName === "Ctrl-C" || keyName === "Ctrl-[") {
+                CodeMirror.e_stop(e);
+                cm.focus();
+            }
+        });
+        $inp.on("blur", function () {
+            $inp.val("");
+            $inp.hide();
+            $dialog.children("#command-sign").text("");
+            $dialog.children("#command-info").text("");
+            if (!$dialog.children("#confirm").is(":visible")) { // if #confirm hidden, show mode
+                $dialog.children("#mode").show();
+            }
+        });
     }
+    exports.init = init;
     
-    CodeMirror.openVimDialog = function (template, shortText, callback, options, cm) {
-        var $dialog = $dialogDiv();
+    CodeMirror.openVimDialog = function (template, shortText, _callback, options, _cm) {
+        cm = _cm, callback = _callback;
         if (shortText === null) { // dealing with Macros
             $dialog.children("#mode").html(template);
             return function (closing) {
@@ -39,45 +68,16 @@
             closed = true;
             // dialog.something;
         }
-        var $inp = $dialog.children("#command");
         $inp.show();
         $inp.focus();
         $dialog.children("#command-sign").text(shortText[0]);
         // $dialog.children("#command-info").text(template.commandInfo); // deprecated?
         $dialog.children("#mode").hide();
 		$dialog.children("#confirm").hide();
-        $inp.on("keydown.vimderbar", function (e) {
-            var keyName = CodeMirror.keyName(e);
-            if (e.keyCode === 13 || keyName === "Enter") {
-                CodeMirror.e_stop(e);
-                var commandVal = $inp.val();
-                if (cm.hasOwnProperty("focus")) {
-                    cm.focus();
-                } else {
-                    $inp.blur();
-                }
-                callback(commandVal);
-            } else if (keyName === "Esc" || keyName === "Ctrl-C" || keyName === "Ctrl-[") {
-                CodeMirror.e_stop(e);
-				cm.focus();
-            }
-        });
-        $inp.one("blur", function () {
-            // clear the input box on blur
-            $inp.val("");
-            $inp.hide();
-            $dialog.children("#command-sign").text("");
-            $dialog.children("#command-info").text("");
-            if (!$dialog.children("#confirm").is(":visible")) { // if #confirm hidden, show mode
-				$dialog.children("#mode").show();
-            }
-            $inp.off(".vimderbar");
-        });
         return close;
     };
     
     CodeMirror.openVimConfirm = function (template, callbacks, option, cm) {
-        var $dialog = $dialogDiv();
 		$dialog.children("#confirm").show();
         $dialog.children("#confirm").text(template);
         $dialog.children("#mode").hide();
@@ -85,13 +85,11 @@
     };
   
 	CodeMirror.hideVimConfirm = function (callbacks, cm) {
-        var $dialog = $dialogDiv();
         $dialog.children("#confirm").hide();
 		$dialog.children("#mode").show();
     };
     
     CodeMirror.updateVimDialog = function (mode) {
-        var $dialog = $dialogDiv();
         $dialog.children("#mode").show();
 		$dialog.children("#confirm").hide();
         $dialog.children("#mode").text("-- " + mode + " --");
@@ -117,7 +115,6 @@
         if (key === "?") {
             return;
         }
-        var $dialog = $dialogDiv();
         $dialog.children("#command-keys").append(key);
         // Function is meant to display
         // characters pressed at the far right of the status bar
@@ -126,7 +123,6 @@
     };
     
     CodeMirror.clearVimDialogKeys = function () {
-        var $dialog = $dialogDiv();
         $dialog.children("#command-keys").text("");
     };
     
@@ -139,4 +135,4 @@
             CodeMirror.updateVimDialog(mode);
         });
     };
-}());
+});
