@@ -33,9 +33,9 @@ define(function (require, exports, module) {
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
         Menus               = brackets.getModule("command/Menus"),
         AppInit             = brackets.getModule("utils/AppInit"),
-        Vim,
-        VimFix,
-        Dialog              = require("Dialog"),
+        CodeMirror          = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
+        Dialog              = require("./Dialog"),
+        VimFix              = require('./VimFix'),
         SearchCursor,
         panelHtml           = require("text!templates/bottom-panel.html"),
         TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar",
@@ -48,42 +48,19 @@ define(function (require, exports, module) {
         oldKeys,
         $vimderbar;
     
-    // import vim keymap from brackets source. once loaded, import vim fixes.
-    // vim fixes are too complex at the moment. perhaps even impossible. 
-    // continue manually updating vim.js for now.
-    /*brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function (vim) {
-        Vim = vim;
-        VimFix = require("VimFix")(CodeMirror.Vim);
-    });*/
+    // import vim keymap from brackets source.
+    brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function (vim) {
+        ExtensionUtils.loadStyleSheet(module, "vimderbar.css");
+        // Add the HTML UI
+        $(".content").append(Mustache.render(panelHtml));
+        // keep vimderbar off by default
+        $vimderbar = $("#vimderbar");
+        $vimderbar.hide();
+    });
+    
     brackets.libRequire(["thirdparty/CodeMirror2/addon/search/searchcursor"], function (sc) {
         SearchCursor = sc;
     });
-    Vim = require("Vim");
-    
-    CodeMirror.commands.vimSave = function (cm) {
-        CommandManager.execute("file.save");
-    };
-  
-    CodeMirror.commands.vimClose = function (cm) {
-        var hostEditor = EditorManager.getCurrentFullEditor(),
-            inlineFocused = EditorManager.getFocusedInlineWidget();
-        if (inlineFocused) {
-            // inline editor exists & is in focus. close it.
-            EditorManager.closeInlineWidget(hostEditor, inlineFocused);
-        } else {
-            // no inline editor is in focus so just close the document.
-            CommandManager.execute("file.close");
-        }
-    };
-    
-    CodeMirror.commands.vimOpen = function (cm) {
-        setTimeout(function () {
-			CommandManager.execute("navigate.quickOpen");
-		}, 200);
-        // used to be "file.open" because quickOpen would automatically close
-        // following the user's push of Enter key to submit Open command (":e[Enter]")
-        // setTimeout meant to give the user a moment to let go of the Enter key.
-    };
     
     function _enableVimderbar(editor) {
         if (editor !== null) {
@@ -104,63 +81,56 @@ define(function (require, exports, module) {
         }
     }
     
+    function showVimderbar(editor) {
+        // turn vim on
+        $vimderbar.show();
+        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
+        editor._codeMirror.updateVimDialog("Normal");
+        _enableVimderbar(editor);
+        vimActive = true;
+        localStorage.vimderbarOn = true;
+        VimFix.init({
+            enable: _enableVimderbar,
+            disable: _disableVimderbar
+        });
+    }
+    
+    function hideVimderbar(editor) {
+        // turn vim off
+        $vimderbar.hide();
+        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
+        _disableVimderbar(editor);
+        vimActive = false;
+        localStorage.vimderbarOn = false;
+        $(EditorManager).trigger({type: "vimderbarDisabled"});
+    }
+    
     function _handleShowHideVimderbar() {
         var activeEditor = EditorManager.getActiveEditor();
-
         if (vimActive === false) {
-            // turn vim on
-            $vimderbar.show();
-            CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
-            CodeMirror.updateVimDialog("Normal");
-            _enableVimderbar(activeEditor);
-            vimActive = true;
-            localStorage.vimderbarOn = true;
-            VimFix = require("VimFix")(EditorManager,
-                                       {enable: _enableVimderbar,
-                                        disable: _disableVimderbar},
-                                        DocumentManager);
+            showVimderbar(activeEditor);
         } else {
-            // turn vim off
-            $vimderbar.hide();
-            CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
-            _disableVimderbar(activeEditor);
-            vimActive = false;
-            localStorage.vimderbarOn = false;
-            $(EditorManager).trigger({type: "vimderbarDisabled"});
+            hideVimderbar(activeEditor);
         }
         EditorManager.resizeEditor();
     }
     
-    
     function init() {
-        var s,
-            view_menu;
-        
-        ExtensionUtils.loadStyleSheet(module, "vimderbar.css");
         // Register function as command
         CommandManager.register("Enable Vimderbar", TOGGLE_VIMDERBAR_ID,
                                 _handleShowHideVimderbar);
         // Add command to View menu, if it exists
-        view_menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
+        var view_menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
         if (view_menu) {
             view_menu.addMenuItem(TOGGLE_VIMDERBAR_ID);
         }
-        // Add the HTML UI
-        s = Mustache.render(panelHtml);
-        $(".content").append(s);
-        // keep vimderbar off by default
-        $vimderbar = $("#vimderbar");
-        $vimderbar.hide();
-        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
 
+        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
         Dialog.init();
     }
     
-    AppInit.htmlReady(function () {
-        init();
-    });
-    
     AppInit.appReady(function () {
+        init();
         oldKeys = EditorManager.getActiveEditor()._codeMirror.getOption("extraKeys");
                 
         if (localStorage.vimderbarOn === "true") {
@@ -170,12 +140,6 @@ define(function (require, exports, module) {
     
     // keep an eye on document changing so that the vim keyMap will apply to all files in the window
     $(DocumentManager).on("currentDocumentChange", function () {
-        var activeEditor = EditorManager.getActiveEditor();
-        if (vimActive === true) {
-            CodeMirror.updateVimDialog("Normal");
-            _enableVimderbar(activeEditor);
-        } else {
-            _disableVimderbar(activeEditor);
-        }
+        _handleShowHideVimderbar();
     });
 });

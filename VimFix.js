@@ -1,22 +1,28 @@
 /*jslint devel: true, nomen: true, indent: 4 */
-/*global define, $, CodeMirror, brackets */
+/*global define, $, CodeMirror, brackets, setTimeout */
 
 // this function's purpose is to make CodeMirror's vim keymap play nice with
 // Brackets.
-define(function () {
+define(function (require, exports, module) {
     "use strict";
-    var VimFix;
-    VimFix = function (editorManager, controller, documentManager) {
-        var escKeyEvent,
-            changeEditor,
+
+    var CodeMirror          = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
+        PreferencesManager  = brackets.getModule("preferences/PreferencesManager"),
+        CommandManager      = brackets.getModule("command/CommandManager"),
+        DocumentManager     = brackets.getModule("document/DocumentManager"),
+        EditorManager       = brackets.getModule("editor/EditorManager"),
+        Commands            = brackets.getModule("command/Commands");
+
+    function init(controller) {
+        var cm,
             fecm,
             precm,
             feKeyMap,
             preKeyMap,
             lastFocusedTimeStamp,
             lastTimeStamp,
-            setVimKeyMap,
             vimMode;
+
 
         // todo:
         // 1. fix insert cursor in inline editors. 
@@ -25,9 +31,9 @@ define(function () {
         //    fixing this bug will likely fix the visual mode bug described below.
 
         /**
-        ** solve the inline-editor dilemma
+        ** TODO: solve the inline-editor dilemma
         **/
-        escKeyEvent = function (jqevent, ed, event) {
+        var escKeyEvent = function (jqevent, ed, event) {
             if (event.type === "keydown" && event.keyCode === 27) {
                 var currentTimeStamp,
                     timeStampDiff;
@@ -66,7 +72,7 @@ define(function () {
             }
         };
 
-        setVimKeyMap = function (map) {
+        var setVimKeyMap = function (map) {
             var mode;
             fecm.setOption("keyMap", map);
             switch (map) {
@@ -83,30 +89,29 @@ define(function () {
             CodeMirror.signal(fecm, "vim-mode-change", {mode: mode});
         };
 
-        changeEditor = function (event, focusedEditor, previousEditor) {
+        var changeEditor = function (event, focusedEditor, previousEditor) {
             if (focusedEditor && previousEditor) {
                 // make sure focusedEditor and previousEditor exist.
                 // this check is to make sure no errors are thrown when
                 // a file is opened.
+                fecm = focusedEditor._codeMirror;
+                precm = previousEditor._codeMirror;
 
                 // get editors so we don't waste resources when user swaps between
                 // documents. Only watch if the focused editor is an inline editor
                 // or if the focused editor contains inline editors.
-                var currentFullEditor = editorManager.getCurrentFullEditor(),
+                var currentFullEditor = EditorManager.getCurrentFullEditor(),
                     inlineEditors = currentFullEditor.getInlineWidgets();
                 // ._visibleRange still the only reliable way to detect whether an
                 // editor is inline or not. I'm having a hard time thinking of another
                 // way to do this.
                 if (focusedEditor._visibleRange || inlineEditors.length !== 0) {
-                    fecm = focusedEditor._codeMirror;
-                    precm = previousEditor._codeMirror;
                     feKeyMap = fecm.getOption("keyMap");
                     preKeyMap = precm.getOption("keyMap");
-                    
+
                     // if the keymap isn't one of Vim.js' keymap options, turn the vim on
                     // and set it to the proper mode.
-                    if (feKeyMap !== "vim" && feKeyMap !== "vim-insert"
-                            && feKeyMap !== "vim-replace") {
+                    if (feKeyMap !== "vim" && feKeyMap !== "vim-insert" && feKeyMap !== "vim-replace") {
                         // enable vim
                         controller.enable(focusedEditor);
                         // force an esc on the editor to get it to act
@@ -163,43 +168,78 @@ define(function () {
                     if (focusedEditor._visibleRange) {
                         // remove then add again so we don't get multiple listeners
                         // for the same event. really piles up after a while.
-                        $(focusedEditor).off("keyEvent", escKeyEvent);
-                        $(focusedEditor).on("keyEvent", escKeyEvent);
+                        fecm.off("keyEvent", escKeyEvent);
+                        fecm.on("keyEvent", escKeyEvent);
                     }
                 }
             }
         };
 
         // init inline editor fix
-        $(editorManager).on("activeEditorChange", changeEditor);
+        $(EditorManager).on("activeEditorChange", changeEditor);
         // add event listener in case user decides to disable vimderbar.
-        $(editorManager).on("vimderbarDisabled", function () {
-            $(editorManager).off("activeEditorChange", changeEditor);
+        $(EditorManager).on("vimderbarDisabled", function () {
+            $(EditorManager).off("activeEditorChange", changeEditor);
+        });
+        
+        cm = EditorManager.getActiveEditor()._codeMirror;
+        cm.on("vim-mode-change", function(e) {
+            vimMode = e.mode;
+        });
+        cm.on("keyHandled", function(cm, name, event) {
+            
         });
 
         /**
-        ** todo: port Vim.js manual fixes over to this file
-        ** & import vim.js from brackets source.
-        **/
+         ** todo: port Vim.js manual fixes over to this file
+         ** & import vim.js from brackets source.
+         **/
+        CodeMirror.commands.save = function (cm) {
+            CommandManager.execute("file.save");
+        };
+        CodeMirror.commands.close = function (cm) {
+            var hostEditor = EditorManager.getCurrentFullEditor(),
+                inlineFocused = EditorManager.getFocusedInlineWidget();
+            if (inlineFocused) {
+                // inline editor exists & is in focus. close it.
+                EditorManager.closeInlineWidget(hostEditor, inlineFocused);
+            } else {
+                // no inline editor is in focus so just close the document.
+                CommandManager.execute("file.close");
+            }
+        };
+        CodeMirror.commands.open = function (cm) {
+            setTimeout(function () {
+                CommandManager.execute("navigate.quickOpen");
+            }, 200);
+            // used to be "file.open" because quickOpen would automatically close
+            // following the user's push of Enter key to submit Open command (":e[Enter]")
+            // setTimeout meant to give the user a moment to let go of the Enter key.
+        };
         CodeMirror.Vim.defineEx("quit", "q", function (cm) {
             cm.focus();
-            CodeMirror.commands.vimClose(cm);
+            CodeMirror.commands.close(cm);
         });
-
         CodeMirror.Vim.defineEx("edit", "e", function (cm) {
-            CodeMirror.commands.vimOpen(cm);
+            CodeMirror.commands.open(cm);
         });
-
         CodeMirror.Vim.defineEx("write", "w", function (cm) {
-            CodeMirror.commands.vimSave(cm);
+            CodeMirror.commands.save(cm);
         });
-
-        // Doesn't work. save gets called and completes but close fires too soon
-        // and asks if i want to save before closing. fix later.
-//        CodeMirror.Vim.defineEx("x", "x", function (cm) {
-//            CodeMirror.commands.vimSave(cm);
-//            CodeMirror.commands.vimClose(cm);
-//        });
-    };
-    return VimFix;
+        CodeMirror.Vim.defineEx("bnext", "bn", function (cm) {
+            var file = DocumentManager.getNextPrevFile(1);
+            CommandManager.execute(Commands.FILE_OPEN, {
+                fullPath: file.fullPath
+            });
+            cm.focus();
+        });
+        CodeMirror.Vim.defineEx("bprev", "bp", function (cm) {
+            var file = DocumentManager.getNextPrevFile(-1);
+            CommandManager.execute(Commands.FILE_OPEN, {
+                fullPath: file.fullPath
+            });
+            cm.focus();
+        });
+    }
+    exports.init = init;
 });
