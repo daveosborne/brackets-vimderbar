@@ -11,19 +11,74 @@ define(function (require, exports, module) {
         CommandManager      = brackets.getModule("command/CommandManager"),
         DocumentManager     = brackets.getModule("document/DocumentManager"),
         EditorManager       = brackets.getModule("editor/EditorManager"),
-        Commands            = brackets.getModule("command/Commands");
+        Commands            = brackets.getModule("command/Commands"),
+        cm,
+        fecm,
+        precm,
+        feKeyMap,
+        preKeyMap,
+        lastFocusedTimeStamp,
+        lastTimeStamp,
+        vimMode,
+        mode,
+        changes,
+        commandDone;
 
-    function init(controller) {
-        var cm,
-            fecm,
-            precm,
-            feKeyMap,
-            preKeyMap,
-            lastFocusedTimeStamp,
-            lastTimeStamp,
-            vimMode;
+    // TODO: this is primitive but functional command status
+    // this needs to be pushed back to CodeMirror to provide
+    // only CodeMirror can parse the commands as typed using the keyMap
+    function handleKey(cm, name, event) {
+        if (mode === "insert") { return; }
+        if (name.match(/Esc|':'/)) {
+            cm.clearVimDialogKeys();
+            return;
+        } else if (name.match(/'y'|'p'|'u'/)) { // these commands don't show up as changes
+            cm.clearVimDialogKeys();
+            cm.updateVimDialogKeys(name.replace(/'(.)'/, "$1"));
+            commandDone = true;
+        } else if (!name.match(/Up|Down|Left|Right|End|Home|PageUp|PageDown|Backspace|Delete|Enter|'h'|'j'|'k'|'l'|';'|'t'|'f'|'%'|'$'|'#'|'^'|'{'|'}'|'\['|'\]'|'\('|'\)'/)) {
+            if (commandDone) {
+                commandDone = false;
+                cm.clearVimDialogKeys();
+            }
+            cm.updateVimDialogKeys(name.replace(/'(.)'/, "$1"));
+            if (changes) {
+                changes = false;
+                commandDone = true;
+            }
+        }
+    }
 
+    function onChanges(cm, changes) {
+        changes = true;
+    }
+    function onModeChange(e) {
+        mode = e.mode;
+    }
+    //function onCommandKey(keys) {
+    //    console.log(keys);
+    //    cm.updateVimDialogKeys(keys);
+    //}
 
+    function attachVimderbar() {
+        cm.off("vim-mode-change", onModeChange);
+        cm.on("vim-mode-change", onModeChange);
+        // vim.js needs new events
+        //cm.off("vim-command-keypress", onCommandKey);
+        //cm.on("vim-command-keypress", onCommandKey);
+        cm.off("beforeChange", onChanges);
+        cm.on("beforeChange", onChanges);
+        cm.off("keyHandled", handleKey);
+        cm.on("keyHandled", handleKey);
+    }
+
+    function changeDoc(_cm) {
+        cm = _cm;
+        attachVimderbar();
+    }
+
+    function init(_cm, controller) {
+        cm = _cm;
         // todo:
         // 1. fix insert cursor in inline editors. 
         //    (open inline editor in normal mode. press i from within the inline editor.
@@ -31,8 +86,8 @@ define(function (require, exports, module) {
         //    fixing this bug will likely fix the visual mode bug described below.
 
         /**
-        ** TODO: solve the inline-editor dilemma
-        **/
+         ** TODO: solve the inline-editor dilemma
+         **/
         var escKeyEvent = function (jqevent, ed, event) {
             if (event.type === "keydown" && event.keyCode === 27) {
                 var currentTimeStamp,
@@ -86,7 +141,9 @@ define(function (require, exports, module) {
             default:
                 mode = "normal";
             }
-            CodeMirror.signal(fecm, "vim-mode-change", {mode: mode});
+            CodeMirror.signal(fecm, "vim-mode-change", {
+                mode: mode
+            });
         };
 
         var changeEditor = function (event, focusedEditor, previousEditor) {
@@ -181,14 +238,6 @@ define(function (require, exports, module) {
         $(EditorManager).on("vimderbarDisabled", function () {
             $(EditorManager).off("activeEditorChange", changeEditor);
         });
-        
-        cm = EditorManager.getActiveEditor()._codeMirror;
-        cm.on("vim-mode-change", function(e) {
-            vimMode = e.mode;
-        });
-        cm.on("keyHandled", function(cm, name, event) {
-            
-        });
 
         /**
          ** todo: port Vim.js manual fixes over to this file
@@ -242,4 +291,7 @@ define(function (require, exports, module) {
         });
     }
     exports.init = init;
+    exports.changeDoc = changeDoc;
+    exports.attachVimderbar = attachVimderbar;
 });
+

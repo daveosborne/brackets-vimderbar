@@ -25,7 +25,6 @@
 
 define(function (require, exports, module) {
     "use strict";
-    
     // Brackets modules
     var CommandManager      = brackets.getModule("command/CommandManager"),
         DocumentManager     = brackets.getModule("document/DocumentManager"),
@@ -46,8 +45,9 @@ define(function (require, exports, module) {
         defaultPrefs        = { height: 5 },
         vimActive           = false,
         oldKeys,
+        cm,
         $vimderbar;
-    
+
     // import vim keymap from brackets source.
     brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function (vim) {
         ExtensionUtils.loadStyleSheet(module, "vimderbar.css");
@@ -57,68 +57,95 @@ define(function (require, exports, module) {
         $vimderbar = $("#vimderbar");
         $vimderbar.hide();
     });
-    
+
     brackets.libRequire(["thirdparty/CodeMirror2/addon/search/searchcursor"], function (sc) {
         SearchCursor = sc;
     });
-    
-    function _enableVimderbar(editor) {
-        if (editor !== null) {
-            CodeMirror.watchVimMode(editor._codeMirror);
+
+    function _enableVimderbar(cm) {
+        if (cm !== null) {
+            CodeMirror.watchVimMode(cm._codeMirror);
             // I know that _codeMirror is deprecated, but I couldn't get
             // this to work in any other way. Will continue to investigate.
-            editor._codeMirror.setOption("extraKeys", null);
-            editor._codeMirror.setOption("showCursorWhenSelecting", true);
-            editor._codeMirror.setOption("keyMap", "vim");
+            cm.setOption("extraKeys", null);
+            cm.setOption("showCursorWhenSelecting", true);
+            cm.setOption("keyMap", "vim");
         }
     }
-    
-    function _disableVimderbar(editor) {
-        if (editor !== null) {
-            editor._codeMirror.setOption("extraKeys", oldKeys);
-            editor._codeMirror.setOption("showCursorWhenSelecting", false);
-            editor._codeMirror.setOption("keyMap", "default");
+
+    function _disableVimderbar(cm) {
+        if (cm !== null) {
+            cm.setOption("extraKeys", oldKeys);
+            cm.setOption("showCursorWhenSelecting", false);
+            cm.setOption("keyMap", "default");
         }
     }
-    
-    function showVimderbar(editor) {
+
+    function showVimderbar(cm) {
+        console.log("show vimderbar");
         // turn vim on
         $vimderbar.show();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
-        editor._codeMirror.updateVimDialog("Normal");
-        _enableVimderbar(editor);
+        VimFix.changeDoc(cm);
+        Dialog.changeDoc(cm);
+        cm.updateVimDialog("Normal");
+        _enableVimderbar(cm);
         vimActive = true;
-        localStorage.vimderbarOn = true;
-        VimFix.init({
-            enable: _enableVimderbar,
-            disable: _disableVimderbar
-        });
+        localStorage.setItem("vimderbarOn", true);
     }
-    
-    function hideVimderbar(editor) {
+
+    function hideVimderbar(cm) {
+        console.log("hide vimderbar");
         // turn vim off
         $vimderbar.hide();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
-        _disableVimderbar(editor);
+        _disableVimderbar(cm);
         vimActive = false;
-        localStorage.vimderbarOn = false;
+        localStorage.setItem("vimderbarOn", false);
         $(EditorManager).trigger({type: "vimderbarDisabled"});
     }
-    
+
     function _handleShowHideVimderbar() {
+        console.log("handleShowHide");
         var activeEditor = EditorManager.getActiveEditor();
-        if (vimActive === false) {
-            showVimderbar(activeEditor);
-        } else {
-            hideVimderbar(activeEditor);
+        if (activeEditor) {
+            console.log("handleShowHide activeEditor");
+            var cm = activeEditor._codeMirror;
+            if (localStorage.getItem("vimderbarOn") === "true") {
+                showVimderbar(cm);
+            } else {
+                hideVimderbar(cm);
+            }
+            EditorManager.resizeEditor();
         }
-        EditorManager.resizeEditor();
     }
-    
+
+    function toggleActive() {
+        if (localStorage.getItem("vimderbarOn") === "true") {
+            localStorage.setItem("vimderbarOn", false);
+        } else {
+            localStorage.setItem("vimderbarOn", true);
+        }
+        _handleShowHideVimderbar();
+    }
+
     function init() {
+        var cm = EditorManager.getActiveEditor()._codeMirror;
+        Dialog.init(cm);
+        VimFix.init(cm, {
+            enable: _enableVimderbar,
+            disable: _disableVimderbar
+        });
+        if (localStorage.getItem('vimderbarOn') === "true") {
+            console.log("init set vimActive");
+            _handleShowHideVimderbar();
+            CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
+        }
+    }
+
+    AppInit.htmlReady(function () {
         // Register function as command
-        CommandManager.register("Enable Vimderbar", TOGGLE_VIMDERBAR_ID,
-                                _handleShowHideVimderbar);
+        CommandManager.register("Enable Vimderbar", TOGGLE_VIMDERBAR_ID, toggleActive);
         // Add command to View menu, if it exists
         var view_menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
         if (view_menu) {
@@ -126,20 +153,14 @@ define(function (require, exports, module) {
         }
 
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
-        Dialog.init();
-    }
+    });
     
     AppInit.appReady(function () {
         init();
         oldKeys = EditorManager.getActiveEditor()._codeMirror.getOption("extraKeys");
-                
-        if (localStorage.vimderbarOn === "true") {
-            _handleShowHideVimderbar();
-        }
     });
     
     // keep an eye on document changing so that the vim keyMap will apply to all files in the window
-    $(DocumentManager).on("currentDocumentChange", function () {
-        _handleShowHideVimderbar();
-    });
+    $(DocumentManager).on("currentDocumentChange", _handleShowHideVimderbar);
 });
+
