@@ -56,7 +56,6 @@
     /* doesn't work ?*/
 }
 
-
 .CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursor {
     z-index: 100 !important;
     background: rgba(67, 216, 145, 0.5) !important;

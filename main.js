@@ -20,83 +20,110 @@
  * 
  */
 
-/*jslint plusplus: true, devel: true, nomen: true, indent: 4, browser: true, maxerr: 50 */
-/*global define, brackets, $, jQuery, Mustache, CodeMirror, localStorage */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*global define, brackets, $, Mustache, localStorage */
 
 define(function (require, exports, module) {
     "use strict";
     // Brackets modules
     var CommandManager      = brackets.getModule("command/CommandManager"),
-        DocumentManager     = brackets.getModule("document/DocumentManager"),
         EditorManager       = brackets.getModule("editor/EditorManager"),
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
         Menus               = brackets.getModule("command/Menus"),
         AppInit             = brackets.getModule("utils/AppInit"),
-        CodeMirror          = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
-        Dialog              = require("./Dialog"),
-        VimFix              = require('./VimFix'),
-        SearchCursor,
         panelHtml           = require("text!templates/bottom-panel.html"),
+        VimFix              = require('./src/VimFix'),
+        CommandDialog       = require("./src/CommandDialog"),
         TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar",
-        VIMDERBAR_PREFS_ID  = "fontface.show-vimderbar.prefs",
-        keyList             = [],
-        loaded              = false,
-        HEADER_HEIGHT       = 5,
-        defaultPrefs        = { height: 5 },
         vimActive           = false,
         oldKeys,
-        cm,
         $vimderbar;
 
-    // import vim keymap from brackets source.
-    brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function (vim) {
-        ExtensionUtils.loadStyleSheet(module, "vimderbar.css");
-        // Add the HTML UI
-        $(".content").append(Mustache.render(panelHtml));
-        // keep vimderbar off by default
-        $vimderbar = $("#vimderbar");
-        $vimderbar.hide();
-    });
+    /**
+     * Initialize Vimderbar plugin; setup menu, load vim.js from CodeMirror, 
+     * setup css and html, hook Document change, apply VimFix, and init CommandDialog
+     */
+    function init() {
+        // Register function as command
+        CommandManager.register("Enable Vimderbar", TOGGLE_VIMDERBAR_ID, toggleActive);
+        // Add command to View menu, if it exists
+        var view_menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
+        if (view_menu) {
+            view_menu.addMenuItem(TOGGLE_VIMDERBAR_ID);
+        }
+        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
 
-    brackets.libRequire(["thirdparty/CodeMirror2/addon/search/searchcursor"], function (sc) {
-        SearchCursor = sc;
-    });
+        // import vim keymap from brackets source.
+        brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
+            ExtensionUtils.loadStyleSheet(module, "styles/vimderbar.css");
+            // Add the HTML UI
+            $(".content").append(Mustache.render(panelHtml));
+            // keep vimderbar off by default
+            $vimderbar = $("#vimderbar");
+            $vimderbar.hide();
 
+            var activeEditor = EditorManager.getActiveEditor();
+            if (activeEditor) {
+                var cm = activeEditor._codeMirror;
+                CommandDialog.init(cm);
+                VimFix.init(cm, CommandDialog, {
+                    enable: _enableVimderbar,
+                    disable: _disableVimderbar
+                });
+                if (localStorage.getItem('vimderbarOn') === "true") {
+                    _handleShowHideVimderbar();
+                    CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
+                }
+            }
+
+            // keep an eye on document changing so that the vim keyMap will apply to all files in the window
+            // $(DocumentManager).on("currentDocumentChange", _handleShowHideVimderbar);
+            $(EditorManager).on("activeEditorChange", _handleShowHideVimderbar);
+        });
+    }
+    /**
+     * @private
+     * Set CodeMirror options to enable Vim.
+     * @param {CodeMirror} cm Current CodeMirror editor instance.
+     */
     function _enableVimderbar(cm) {
-        if (cm !== null) {
-            CodeMirror.watchVimMode(cm._codeMirror);
-            // I know that _codeMirror is deprecated, but I couldn't get
-            // this to work in any other way. Will continue to investigate.
-            cm.setOption("extraKeys", null);
-            cm.setOption("showCursorWhenSelecting", true);
-            cm.setOption("keyMap", "vim");
-        }
+        // I know that _codeMirror is deprecated, but I couldn't get
+        // this to work in any other way. Will continue to investigate.
+        cm.setOption("extraKeys", null);
+        cm.setOption("showCursorWhenSelecting", true);
+        cm.setOption("keyMap", "vim");
     }
-
+    /**
+     * @private
+     * Set CodeMirror options back to default.
+     * @param {CodeMirror} cm Current CodeMirror editor instance.
+     */
     function _disableVimderbar(cm) {
-        if (cm !== null) {
-            cm.setOption("extraKeys", oldKeys);
-            cm.setOption("showCursorWhenSelecting", false);
-            cm.setOption("keyMap", "default");
-        }
+        cm.setOption("extraKeys", oldKeys);
+        cm.setOption("showCursorWhenSelecting", false);
+        cm.setOption("keyMap", "default");
     }
-
-    function showVimderbar(cm) {
-        console.log("show vimderbar");
-        // turn vim on
+    /**
+     * @private
+     * Show Vimderbar status, enable Vimderbar on current CodeMirror instance.
+     * @param {CodeMirror} cm Current CodeMirror editor instance.
+     */
+    function _showVimderbar(cm) {
         $vimderbar.show();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
-        VimFix.changeDoc(cm);
-        Dialog.changeDoc(cm);
-        cm.updateVimDialog("Normal");
+        VimFix.changeDocument(cm);
+        CommandDialog.changeDocument(cm);
+        cm.updateVimStatus("Normal");
         _enableVimderbar(cm);
         vimActive = true;
         localStorage.setItem("vimderbarOn", true);
     }
-
-    function hideVimderbar(cm) {
-        console.log("hide vimderbar");
-        // turn vim off
+    /**
+     * @private
+     * Hide Vimderbar status, disable Vimderbar.
+     * @param {CodeMirror} cm Current CodeMirror editor instance.
+     */
+    function _hideVimderbar(cm) {
         $vimderbar.hide();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
         _disableVimderbar(cm);
@@ -104,22 +131,27 @@ define(function (require, exports, module) {
         localStorage.setItem("vimderbarOn", false);
         $(EditorManager).trigger({type: "vimderbarDisabled"});
     }
-
+    /**
+     * @private
+     * Hide or show Vimderbar on active editor window based on localStorage
+     */
     function _handleShowHideVimderbar() {
-        console.log("handleShowHide");
         var activeEditor = EditorManager.getActiveEditor();
         if (activeEditor) {
-            console.log("handleShowHide activeEditor");
             var cm = activeEditor._codeMirror;
-            if (localStorage.getItem("vimderbarOn") === "true") {
-                showVimderbar(cm);
-            } else {
-                hideVimderbar(cm);
+            if (cm !== null) {
+                if (localStorage.getItem("vimderbarOn") === "true") {
+                    _showVimderbar(cm);
+                } else {
+                    _hideVimderbar(cm);
+                }
             }
-            EditorManager.resizeEditor();
         }
+        EditorManager.resizeEditor();
     }
-
+    /**
+     * Toggle Vimderbar on and off.
+     */
     function toggleActive() {
         if (localStorage.getItem("vimderbarOn") === "true") {
             localStorage.setItem("vimderbarOn", false);
@@ -128,39 +160,8 @@ define(function (require, exports, module) {
         }
         _handleShowHideVimderbar();
     }
-
-    function init() {
-        var cm = EditorManager.getActiveEditor()._codeMirror;
-        Dialog.init(cm);
-        VimFix.init(cm, {
-            enable: _enableVimderbar,
-            disable: _disableVimderbar
-        });
-        if (localStorage.getItem('vimderbarOn') === "true") {
-            console.log("init set vimActive");
-            _handleShowHideVimderbar();
-            CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
-        }
-    }
-
-    AppInit.htmlReady(function () {
-        // Register function as command
-        CommandManager.register("Enable Vimderbar", TOGGLE_VIMDERBAR_ID, toggleActive);
-        // Add command to View menu, if it exists
-        var view_menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
-        if (view_menu) {
-            view_menu.addMenuItem(TOGGLE_VIMDERBAR_ID);
-        }
-
-        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
-    });
-    
     AppInit.appReady(function () {
         init();
         oldKeys = EditorManager.getActiveEditor()._codeMirror.getOption("extraKeys");
     });
-    
-    // keep an eye on document changing so that the vim keyMap will apply to all files in the window
-    $(DocumentManager).on("currentDocumentChange", _handleShowHideVimderbar);
 });
-
