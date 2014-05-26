@@ -21,7 +21,7 @@
  */
 
 /*jslint plusplus: true, devel: true, nomen: true, indent: 4, browser: true, maxerr: 50 */
-/*global define, brackets, $, jQuery, Mustache, CodeMirror, localStorage */
+/*global define, brackets, $, jQuery, Mustache, localStorage */
 
 define(function (require, exports, module) {
     "use strict";
@@ -33,6 +33,7 @@ define(function (require, exports, module) {
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
         Menus               = brackets.getModule("command/Menus"),
         AppInit             = brackets.getModule("utils/AppInit"),
+        CodeMirror          = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
         Vim,
         VimFix,
         Dialog              = require("Dialog"),
@@ -118,7 +119,8 @@ define(function (require, exports, module) {
             VimFix = require("VimFix")(EditorManager,
                                        {enable: _enableVimderbar,
                                         disable: _disableVimderbar},
-                                        DocumentManager);
+                                        DocumentManager,
+                                        CodeMirror);
         } else {
             // turn vim off
             $vimderbar.hide();
@@ -153,7 +155,7 @@ define(function (require, exports, module) {
         $vimderbar.hide();
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
 
-        Dialog.init();
+        Dialog.init(CodeMirror);
     }
     
     AppInit.htmlReady(function () {
@@ -161,10 +163,13 @@ define(function (require, exports, module) {
     });
     
     AppInit.appReady(function () {
-        oldKeys = EditorManager.getActiveEditor()._codeMirror.getOption("extraKeys");
-                
-        if (localStorage.vimderbarOn === "true") {
-            _handleShowHideVimderbar();
+        var ed = EditorManager.getActiveEditor();
+        if (ed) {
+            oldKeys = ed._codeMirror.getOption("extraKeys");
+                    
+            if (localStorage.vimderbarOn === "true") {
+                _handleShowHideVimderbar();
+            }
         }
     });
     

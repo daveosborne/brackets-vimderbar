@@ -1,12 +1,12 @@
 /*jslint devel: true, nomen: true, indent: 4 */
-/*global define, $, CodeMirror, brackets */
+/*global define, $, brackets */
 
 // this function's purpose is to make CodeMirror's vim keymap play nice with
 // Brackets.
 define(function () {
     "use strict";
     var VimFix;
-    VimFix = function (editorManager, controller, documentManager) {
+    VimFix = function (editorManager, controller, documentManager, CodeMirror) {
         var escKeyEvent,
             changeEditor,
             fecm,
