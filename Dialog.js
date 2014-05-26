@@ -60,7 +60,7 @@ define(function (require, exports, module) {
                 // "/" and "?" search used to be integrated with the Vim.js file and
                 // the status bar, but I think the native Brackets search is much more
                 // efficient. @ff.
-                CommandManager.execute("edit.find");
+                CommandManager.execute("cmd.find");
                 return;
             }
             var closed = false, me = this;
@@ -104,12 +104,12 @@ define(function (require, exports, module) {
             if (prev === true) {
                 // user issued a "previous" command (N)
                 for (i = 0; i < repeat; i++) {
-                    CommandManager.execute("edit.findPrevious");
+                    CommandManager.execute("cmd.findPrevious");
                 }
             } else {
                 // user issued a "next" command (n)
                 for (i = 0; i < repeat; i++) {
-                    CommandManager.execute("edit.findNext");
+                    CommandManager.execute("cmd.findNext");
                 }
             }
         };

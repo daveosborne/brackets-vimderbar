@@ -166,10 +166,10 @@ define(function (require, exports, module) {
         var ed = EditorManager.getActiveEditor();
         if (ed) {
             oldKeys = ed._codeMirror.getOption("extraKeys");
-                    
-            if (localStorage.vimderbarOn === "true") {
-                _handleShowHideVimderbar();
-            }
+        }
+        
+        if (localStorage.vimderbarOn === "true") {
+            _handleShowHideVimderbar();
         }
     });
     
