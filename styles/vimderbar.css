@@ -1,62 +1,73 @@
-#vimderbar {
-    padding: 1px;
-    padding-left: 10px;
+.vimderbar {
     background: #2D2E30;
     color: #8fddff;
     display: block;
     width: 100%;
+    height: 1.4em;
     overflow: hidden;
-    text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-#confirm {
-	color: #FF7B7B;
+.vimderbar-confirm {
+    margin: 1px;
+    margin-left: 10px;
+    color: #FF7B7B;
     text-shadow: none;
 }
 
-#mode {
+.vimderbar-mode {
+    margin: 1px;
+    margin-left: 10px;
     text-transform: capitalize;
 }
 
-#command {
-    color: #fff;
+input.vimderbar-command {
     color: #8fddff;
     border: none;
-    background: transparent;
+    background: #2D2E30;
     padding: 0;
     margin: 0;
     margin-top: -1px;
     margin-left: -1px;
     display: none;
     font-weight: 300;
-    font-size: inherit;
 }
 
-#command:focus {
+input.vimderbar-command:focus {
+    background: #2D2E30;
     border: none;
     box-shadow: none;
 }
 
-#command-info {
+.vimderbar-command-sign {
+    margin-top: 1px;
+    margin-left: 10px;
+    font-size: 1.05em;
+    font-weight: bold;
+}
+
+.vimderbar-command-info {
     font-size: 0.9em;
     color: #888;
 }
 
-#command-confirm {
-	color: #d62d47;
+.vimderbar-command-confirm {
+    color: #d62d47;
 }
 
-#command-keys {
+.vimderbar-command-keys {
     position: absolute;
     right: 10px;
 }
 
 .cm-searching {
-    background: rgba(255, 255, 0, .4) !important;
+    background: rgb(255, 255, 0);
+    background: rgba(255, 255, 0, .4);
     /* doesn't work ?*/
 }
 
-.CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursor {
-    z-index: 100 !important;
-    background: rgba(67, 216, 145, 0.5) !important;
+.cm-keymap-fat-cursor .CodeMirror-cursor {
+    z-index: 100;
+    background: rgb(67, 216, 145);
+    background: rgba(67, 216, 145, 0.5);
 }

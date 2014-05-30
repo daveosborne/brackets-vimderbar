@@ -42,9 +42,6 @@ review the
 [Brackets Coding Conventions]
 (https://github.com/adobe/brackets/wiki/Brackets%20Coding%20Conventions).
 
-__Note:__ The Vim.js file isn't my own code, so I have tried to adhere to 
-CodeMirror's style.
-
 Thanks!
 
 ## Licence

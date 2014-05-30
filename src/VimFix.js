@@ -1,16 +1,16 @@
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, $, brackets, setTimeout */
+/* jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/* global define, $, brackets, setTimeout */
 
 // this function's purpose is to make CodeMirror's vim keymap play nice with
 // Brackets.
 define(function (require, exports) {
     "use strict";
 
-    var CodeMirror          = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
-        CommandManager      = brackets.getModule("command/CommandManager"),
-        DocumentManager     = brackets.getModule("document/DocumentManager"),
-        EditorManager       = brackets.getModule("editor/EditorManager"),
-        Commands            = brackets.getModule("command/Commands"),
+    var CodeMirror      = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
+        CommandManager  = brackets.getModule("command/CommandManager"),
+        DocumentManager = brackets.getModule("document/DocumentManager"),
+        EditorManager   = brackets.getModule("editor/EditorManager"),
+        Commands        = brackets.getModule("command/Commands"),
         CommandDialog,
         cm,
         fecm,

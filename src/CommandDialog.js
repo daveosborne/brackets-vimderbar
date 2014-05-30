@@ -1,12 +1,12 @@
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, $, brackets, Mustache */
+/* jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/* global define, $, brackets, Mustache */
 
 // Handles status bar interactions 
 define(function (require, exports) {
     "use strict";
     
-    var CommandManager = brackets.getModule("command/CommandManager"),
-        CodeMirror     = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
+    var CommandManager   = brackets.getModule("command/CommandManager"),
+        CodeMirror       = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
         ExCommandHistory = require("./ExCommandHistory"),
         cm,
         callback,
@@ -22,7 +22,7 @@ define(function (require, exports) {
         cm = _cm;
         _attachVimderbar(cm);
         $dialog = $("#vimderbar");
-        $input = $dialog.children("#command");
+        $input = $dialog.children(".vimderbar-command");
         $input.on("keydown", function (e) {
             var keyName = CodeMirror.keyName(e);
             var commandVal = $input.val();
@@ -45,22 +45,22 @@ define(function (require, exports) {
             } else if (keyName === "Esc" || keyName === "Ctrl-C" || keyName === "Ctrl-[") {
                 CodeMirror.e_stop(e);
                 $input.blur();
-                cm.focus();
             }
         });
         $input.on("blur", function () {
             $input.val("");
             $input.hide();
-            $dialog.children("#command-sign").text("");
-            $dialog.children("#command-info").text("");
-            if (!$dialog.children("#confirm").is(":visible")) { // if #confirm hidden, show mode
-                $dialog.children("#mode").show();
+            $dialog.children(".vimderbar-command-sign").text("");
+            $dialog.children(".vimderbar-command-info").text("");
+            if (!$dialog.children(".vimderbar-confirm").is(":visible")) { // if confirm hidden, show mode
+                $dialog.children(".vimderbar-mode").show();
             }
             inHistory = false;
             ExCommandHistory.exitHistory();
             cm.focus();
         });
         ExCommandHistory.init();
+        cm.focus();
     }
     /**     
      * Wipe out project command history.
@@ -106,7 +106,7 @@ define(function (require, exports) {
         // TODO: this could be brittle, is the template format going to change?
         var shortText = $(Mustache.render(template))[0].innerHTML;
         if (shortText === null) { // dealing with Macros
-            $dialog.children("#mode").html(template);
+            $dialog.children(".vimderbar-mode").html(template);
             return function (closing) {
                 if (closing) {
                     return false;
@@ -131,9 +131,9 @@ define(function (require, exports) {
         }
         $input.show();
         $input.focus();
-        $dialog.children("#command-sign").text(shortText[0]);
-        $dialog.children("#mode").hide();
-        $dialog.children("#confirm").hide();
+        $dialog.children(".vimderbar-command-sign").text(shortText[0]);
+        $dialog.children(".vimderbar-mode").hide();
+        $dialog.children(".vimderbar-confirm").hide();
         return close;
     }
     /**
@@ -142,9 +142,9 @@ define(function (require, exports) {
      */
     function updateVimStatus(mode) {
         if ($dialog) {
-            $dialog.children("#mode").show();
-            $dialog.children("#confirm").hide();
-            $dialog.children("#mode").text("-- " + mode + " --");
+            $dialog.children(".vimderbar-mode").show();
+            $dialog.children(".vimderbar-confirm").hide();
+            $dialog.children(".vimderbar-mode").text("-- " + mode + " --");
         }
     }
     /**
@@ -153,14 +153,14 @@ define(function (require, exports) {
      */
     function updateVimCommandKeys(key) {
         if (key !== "?") {
-            $dialog.children("#command-keys").append(key);
+            $dialog.children(".vimderbar-command-keys").append(key);
         }
     }
     /**
      * Clear current command from status bar.
      */
     function clearVimCommandKeys() {
-        $dialog.children("#command-keys").text("");
+        $dialog.children(".vimderbar-command-keys").text("");
     }
     
     CodeMirror.openDialog = openDialog;

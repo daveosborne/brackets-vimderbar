@@ -1,11 +1,11 @@
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, localStorage, $, brackets */
+/* jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/* global define, localStorage, $, brackets */
 
 // holds vim ex commmand history in projectFile
 define(function (require, exports) {
-    var ProjectManager = brackets.getModule("project/ProjectManager"), 
+    var ProjectManager     = brackets.getModule("project/ProjectManager"),
         PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
-        vimderbarPrefs = PreferencesManager.getExtensionPrefs("vimderbar"),
+        vimderbarPrefs     = PreferencesManager.getExtensionPrefs("vimderbar"),
         commandHistory,
         historyPosition,
         currentProject,
