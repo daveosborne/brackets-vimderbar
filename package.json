@@ -5,6 +5,6 @@
   "homepage": "https://github.com/fontface/brackets-vimderbar",
   "version": "0.5.0",
   "author": "fontface (https://github.com/fontface)",
-  "contributors": ["daveosborne (https://github.com/daveosborne)"]
+  "contributors": ["daveosborne (https://github.com/daveosborne)"],
   "license": "MIT/WTFPL"
 }
