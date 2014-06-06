@@ -93,6 +93,8 @@ define(function (require, exports) {
      * @param {String} key Key pressed.
      */
     function _onKeypress(key) {
+        // fix broken '/' search by calling cmd.find
+        if (key === '/') { CommandManager.execute("cmd.find"); }
         // prevent esc from being displayed or clearing the dialog keys
         if (key.match(/Esc/)) { return; }
         if (!key.match(/:|h|j|k|l|;/)) {
