@@ -14,6 +14,7 @@ define(function (require, exports, module) {
         CommandDialog       = require("./src/CommandDialog"),
         TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar",
         vimActive           = false,
+        firstInit           = true,
         oldKeys,
         $vimderbar;
 
@@ -40,22 +41,6 @@ define(function (require, exports, module) {
 
         // import vim keymap from brackets source.
         brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
-            var activeEditor = EditorManager.getActiveEditor();
-            if (activeEditor) {
-                var cm = activeEditor._codeMirror;
-                CommandDialog.init(cm);
-                VimFix.init(cm, CommandDialog, {
-                    enable: _enableVimderbar,
-                    disable: _disableVimderbar
-                });
-                if (localStorage.getItem('vimderbarOn') === "true") {
-                    _handleShowHideVimderbar();
-                    CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
-                }
-            }
-
-            // keep an eye on document changing so that the vim keyMap will apply to all files in the window
-            // $(DocumentManager).on("currentDocumentChange", _handleShowHideVimderbar);
             $(EditorManager).on("activeEditorChange", _handleShowHideVimderbar);
         });
     }
@@ -118,6 +103,18 @@ define(function (require, exports, module) {
         if (activeEditor) {
             var cm = activeEditor._codeMirror;
             if (cm !== null) {
+                if (firstInit) {
+                    CommandDialog.init(cm);
+                    VimFix.init(cm, CommandDialog, {
+                        enable: _enableVimderbar,
+                        disable: _disableVimderbar
+                    });
+                    if (localStorage.getItem('vimderbarOn') === "true") {
+                        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
+                    }
+                    firstInit = false;
+                }
+
                 if (localStorage.getItem("vimderbarOn") === "true") {
                     _showVimderbar(cm);
                 } else {
