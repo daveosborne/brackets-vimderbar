@@ -140,6 +140,9 @@ define(function (require, exports, module) {
     }
     AppInit.appReady(function () {
         init();
-        oldKeys = EditorManager.getActiveEditor()._codeMirror.getOption("extraKeys");
+        var ed = EditorManager.getActiveEditor();
+        if (ed) {
+            oldKeys = ed._codeMirror.getOption("extraKeys");
+        }
     });
 });
