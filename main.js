@@ -30,16 +30,16 @@ define(function (require, exports, module) {
             view_menu.addMenuItem(TOGGLE_VIMDERBAR_ID);
         }
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
+        
+        // Add the HTML UI
+        ExtensionUtils.loadStyleSheet(module, "styles/vimderbar.css");
+        $(".content").append(Mustache.render(panelHtml));
+        // keep vimderbar off by default
+        $vimderbar = $("#vimderbar");
+        $vimderbar.hide();
 
         // import vim keymap from brackets source.
         brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
-            // Add the HTML UI
-            ExtensionUtils.loadStyleSheet(module, "styles/vimderbar.css");
-            $(".content").append(Mustache.render(panelHtml));
-            // keep vimderbar off by default
-            $vimderbar = $("#vimderbar");
-            $vimderbar.hide();
-
             var activeEditor = EditorManager.getActiveEditor();
             if (activeEditor) {
                 var cm = activeEditor._codeMirror;
