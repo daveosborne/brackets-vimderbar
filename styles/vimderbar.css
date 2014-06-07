@@ -1,0 +1,73 @@
+.vimderbar {
+    background: #2D2E30;
+    color: #8fddff;
+    display: block;
+    width: 100%;
+    height: 1.4em;
+    overflow: hidden;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.vimderbar-confirm {
+    margin: 1px;
+    margin-left: 10px;
+    color: #FF7B7B;
+    text-shadow: none;
+}
+
+.vimderbar-mode {
+    margin: 1px;
+    margin-left: 10px;
+    text-transform: capitalize;
+}
+
+input.vimderbar-command {
+    color: #8fddff;
+    border: none;
+    background: #2D2E30;
+    padding: 0;
+    margin: 0;
+    margin-top: -1px;
+    margin-left: -1px;
+    display: none;
+    font-weight: 300;
+}
+
+input.vimderbar-command:focus {
+    background: #2D2E30;
+    border: none;
+    box-shadow: none;
+}
+
+.vimderbar-command-sign {
+    margin-top: 1px;
+    margin-left: 10px;
+    font-size: 1.05em;
+    font-weight: bold;
+}
+
+.vimderbar-command-info {
+    font-size: 0.9em;
+    color: #888;
+}
+
+.vimderbar-command-confirm {
+    color: #d62d47;
+}
+
+.vimderbar-command-keys {
+    position: absolute;
+    right: 10px;
+}
+
+.cm-searching {
+    background: rgb(255, 255, 0);
+    background: rgba(255, 255, 0, .4);
+    /* doesn't work ?*/
+}
+
+.cm-keymap-fat-cursor .CodeMirror-cursor {
+    z-index: 100;
+    background: rgb(67, 216, 145);
+    background: rgba(67, 216, 145, 0.5);
+}
