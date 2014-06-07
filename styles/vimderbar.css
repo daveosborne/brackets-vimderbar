@@ -67,7 +67,7 @@ input.vimderbar-command:focus {
 }
 
 .cm-keymap-fat-cursor .CodeMirror-cursor {
-    z-index: 100;
-    background: rgb(67, 216, 145);
-    background: rgba(67, 216, 145, 0.5);
+    z-index: 100 !important;
+    background: rgb(67, 216, 145) !important;
+    background: rgba(67, 216, 145, 0.5) !important;
 }
