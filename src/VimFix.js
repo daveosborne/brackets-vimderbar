@@ -97,20 +97,14 @@ define(function (require, exports) {
         if (key === '/') { CommandManager.execute("cmd.find"); }
         // prevent esc from being displayed or clearing the dialog keys
         if (key.match(/Esc/)) { return; }
-        if (!key.match(/:|h|j|k|l|;/)) {
-            if (commandDone) {
-                cm.clearVimCommandKeys();
-                commandDone = false;
-            }
-            cm.updateVimCommandKeys(key);
-        }
+        cm.updateVimCommandKeys(key);
     }
     /**
      * @private
      * Handler for CodeMirror's vim.js vim-command-done event. Sets commandDone so current command is cleared on next keypress.
      */
     function _onCommandDone() {
-        commandDone = true;
+        cm.clearVimCommandKeys();
     }
     /**
      * Attach events to current CodeMirror instance.
