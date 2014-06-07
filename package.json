@@ -6,5 +6,8 @@
   "version": "0.5.0",
   "author": "fontface (https://github.com/fontface)",
   "contributors": ["daveosborne (https://github.com/daveosborne)"],
-  "license": "MIT/WTFPL"
+  "license": "MIT/WTFPL",
+  "engines": {
+      "brackets": ">=0.40.0"
+  }
 }
