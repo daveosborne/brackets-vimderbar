@@ -3,7 +3,7 @@
 is an extension meant to bring vim-like functionality to 
 [Brackets](http://brackets.io).
 
-![""](http://i.minus.com/ibodq0DYcbsoYp.png)
+![""](sc.png)
 
 All of the Vim keymapping is from [CodeMirror](http://codemirror.net)'s 
 /keymap/vim.js included with Brackets.
