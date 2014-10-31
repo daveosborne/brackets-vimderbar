@@ -4,16 +4,16 @@
 // Handles status bar interactions 
 define(function (require, exports) {
     "use strict";
-    
-    var CommandManager   = brackets.getModule("command/CommandManager"),
-        CodeMirror       = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
+
+    var CommandManager = brackets.getModule("command/CommandManager"),
+        CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
         ExCommandHistory = require("./ExCommandHistory"),
         cm,
         callback,
         $dialog,
         $input,
         inHistory;
-    
+
     /**     
      * Setup Vim status bar, hook events and setup ExCommand history.
      * @param {CodeMirror} _cm The current CodeMirror instance.
@@ -81,7 +81,7 @@ define(function (require, exports) {
         cm.updateVimStatus = CodeMirror.updateVimStatus;
         cm.clearVimCommandKeys = CodeMirror.clearVimCommandKeys;
         cm.updateVimCommandKeys = CodeMirror.updateVimCommandKeys;
-        
+
         cm.on("vim-mode-change", function (event) {
             var mode = event.mode;
             CodeMirror.updateVimStatus(mode);
@@ -122,6 +122,7 @@ define(function (require, exports) {
             return;
         }
         var closed = false;
+
         function close() {
             if (closed) {
                 return;
@@ -162,12 +163,12 @@ define(function (require, exports) {
     function clearVimCommandKeys() {
         $dialog.children(".vimderbar-command-keys").text("");
     }
-    
+
     CodeMirror.openDialog = openDialog;
     CodeMirror.updateVimStatus = updateVimStatus;
     CodeMirror.updateVimCommandKeys = updateVimCommandKeys;
     CodeMirror.clearVimCommandKeys = clearVimCommandKeys;
-    
+
     exports.init = init;
     exports.changeDocument = changeDocument;
     exports.resetHistory = resetHistory;

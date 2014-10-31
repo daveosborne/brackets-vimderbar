@@ -1,13 +1,13 @@
 {
-  "name": "fontface.brackets-vimderbar",
-  "title": "Vimderbar",
-  "description": "Adds vim-like functionality & status bar to Brackets.",
-  "homepage": "https://github.com/fontface/brackets-vimderbar",
-  "version": "0.5.0",
-  "author": "fontface (https://github.com/fontface)",
-  "contributors": ["daveosborne (https://github.com/daveosborne)"],
-  "license": "MIT/WTFPL",
-  "engines": {
-      "brackets": ">=0.40.0"
-  }
+    "name": "brackets-vimderbar",
+    "title": "Vimderbar",
+    "description": "Adds vim-like functionality & status bar to Brackets.",
+    "homepage": "https://github.com/daveosborne/brackets-vimderbar",
+    "version": "0.5.1",
+    "author": "daveosborne (https://github.com/daveosborne)",
+    "contributors": ["fontface (https://github.com/fontface)"],
+    "license": "MIT/WTFPL",
+    "engines": {
+        "brackets": ">=0.40.0"
+    }
 }

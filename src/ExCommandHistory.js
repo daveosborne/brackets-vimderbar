@@ -3,14 +3,14 @@
 
 // holds vim ex commmand history in projectFile
 define(function (require, exports) {
-    var ProjectManager     = brackets.getModule("project/ProjectManager"),
+    var ProjectManager = brackets.getModule("project/ProjectManager"),
         PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
-        vimderbarPrefs     = PreferencesManager.getExtensionPrefs("vimderbar"),
+        vimderbarPreferences = PreferencesManager.getExtensionPrefs("vimderbar"),
         commandHistory,
         historyPosition,
         currentProject,
         useCommonVimHistory;
-    
+
     // Housekeeping
     /**
      * Clear commandHistory.
@@ -101,19 +101,19 @@ define(function (require, exports) {
     function exitHistory() {
         historyPosition = -1;
     }
-    
+
     /**
      * Get history preferences and change project history to current project.
      */
     function init() {
-        useCommonVimHistory = vimderbarPrefs.get("commonHistory");
+        useCommonVimHistory = vimderbarPreferences.get("commonHistory");
         _changeProject(ProjectManager.getProjectRoot().fullPath);
-        
+
         $(ProjectManager).on("projectOpen", function () {
             _changeProject(ProjectManager.getProjectRoot().fullPath);
         });
-        vimderbarPrefs.on("change", function () {
-            useCommonVimHistory = vimderbarPrefs.get("commonHistory");
+        vimderbarPreferences.on("change", function () {
+            useCommonVimHistory = vimderbarPreferences.get("commonHistory");
             _changeProject(ProjectManager.getProjectRoot().fullPath);
         });
     }
