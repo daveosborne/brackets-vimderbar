@@ -15,6 +15,25 @@ define(function (require, exports) {
         inHistory;
 
     /**     
+     * Attach Vim functions to current CodeMirror instance,
+     * add watch for mode changes on current instance.
+     * @param {CodeMirror} _cm The current CodeMirror instance.
+     */
+    function _attachVimderbar(cm) {
+        // this should use CodeMirror.defineExtension but
+        // we're too late to change the prototype when Dialog is loaded
+        cm.openDialog = CodeMirror.openDialog;
+        cm.updateVimStatus = CodeMirror.updateVimStatus;
+        cm.clearVimCommandKeys = CodeMirror.clearVimCommandKeys;
+        cm.updateVimCommandKeys = CodeMirror.updateVimCommandKeys;
+
+        cm.off("vim-mode-change");
+        cm.on("vim-mode-change", function (event) {
+            var mode = event.mode;
+            CodeMirror.updateVimStatus(mode);
+        });
+    }
+    /**     
      * Setup Vim status bar, hook events and setup ExCommand history.
      * @param {CodeMirror} _cm The current CodeMirror instance.
      */
@@ -40,10 +59,10 @@ define(function (require, exports) {
             } else if (e.keyCode === 13 || keyName === "Enter") {
                 CodeMirror.e_stop(e);
                 ExCommandHistory.add(commandVal);
-                cm.focus();
+                $input.blur();
                 callback(commandVal);
             } else if (keyName === "Esc" || keyName === "Ctrl-C" || keyName === "Ctrl-[") {
-                CodeMirror.e_stop(e);
+                // CodeMirror.e_stop(e);
                 $input.blur();
             }
         });
@@ -68,24 +87,6 @@ define(function (require, exports) {
     function resetHistory() {
         // TODO: clean out localStorage
         ExCommandHistory.resetHistory();
-    }
-    /**     
-     * Attach Vim functions to current CodeMirror instance,
-     * add watch for mode changes on current instance.
-     * @param {CodeMirror} _cm The current CodeMirror instance.
-     */
-    function _attachVimderbar(cm) {
-        // this should use CodeMirror.defineExtension but
-        // we're too late to change the prototype when Dialog is loaded
-        cm.openDialog = CodeMirror.openDialog;
-        cm.updateVimStatus = CodeMirror.updateVimStatus;
-        cm.clearVimCommandKeys = CodeMirror.clearVimCommandKeys;
-        cm.updateVimCommandKeys = CodeMirror.updateVimCommandKeys;
-
-        cm.on("vim-mode-change", function (event) {
-            var mode = event.mode;
-            CodeMirror.updateVimStatus(mode);
-        });
     }
     /**     
      * Change current editor instance to cm.

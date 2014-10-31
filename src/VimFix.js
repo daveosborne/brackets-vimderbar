@@ -108,30 +108,6 @@ define(function (require, exports) {
         cm.clearVimCommandKeys();
     }
     /**
-     * Attach events to current CodeMirror instance.
-     * @param {CodeMirror} cm Current CodeMirror instance.
-     */
-    function attachVimderbar(cm) {
-        cm.off("keydown", _escKeyEvent);
-        cm.on("keydown", _escKeyEvent);
-        cm.off("vim-keypress", _onKeypress);
-        cm.on("vim-keypress", _onKeypress);
-        cm.off("vim-command-done", _onCommandDone);
-        cm.on("vim-command-done", _onCommandDone);
-    }
-    /**
-     * Change current document, attach events to new editor.
-     * @param {CodeMirror} cm CodeMirror instance to attach to.
-     */
-    function changeDocument(cm) {
-        attachVimderbar(cm);
-    }
-    // TODO: fix insert cursor in inline editors. 
-    //    (open inline editor in normal mode. press i from within the inline editor.
-    //     notice that the cursor remains "fat".) 
-    //    fixing this bug will likely fix the visual mode bug described below.
-
-    /**
      * @private
      * Close inline editor when esc is pressed outside of insert/replace mode.
      * @param {CodeMirror} cm Current CodeMirror instance. Unused.
@@ -155,6 +131,30 @@ define(function (require, exports) {
             }
         }
     }
+    /**
+     * Attach events to current CodeMirror instance.
+     * @param {CodeMirror} cm Current CodeMirror instance.
+     */
+    function attachVimderbar(cm) {
+        cm.off("keydown", _escKeyEvent);
+        cm.on("keydown", _escKeyEvent);
+        cm.off("vim-keypress", _onKeypress);
+        cm.on("vim-keypress", _onKeypress);
+        cm.off("vim-command-done", _onCommandDone);
+        cm.on("vim-command-done", _onCommandDone);
+    }
+    /**
+     * Change current document, attach events to new editor.
+     * @param {CodeMirror} cm CodeMirror instance to attach to.
+     */
+    function changeDocument(cm) {
+        attachVimderbar(cm);
+    }
+    // TODO: fix insert cursor in inline editors. 
+    //    (open inline editor in normal mode. press i from within the inline editor.
+    //     notice that the cursor remains "fat".) 
+    //    fixing this bug will likely fix the visual mode bug described below.
+
     /**
      * Set CodeMirror KeyMap based on mode changes.
      * @param {String} map New map name.

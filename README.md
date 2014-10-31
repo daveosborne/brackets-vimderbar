@@ -15,7 +15,9 @@ All of the Vim keymapping is from [CodeMirror](http://codemirror.net)'s
 0. Enable Vimderbar via the Brackets menu with **View > Enable Vimderbar**.
 
 ## Features
-+ New: `:` command history per-project or with a common history based on 
++ New: Add custom keybindings in Preferences with `vimderbar.extraKeys` = [keyMap](http://codemirror.net/doc/manual.html#keymaps)
+  + Function based bindings are not supported, as the Preferences are in json.
++ `:` command history per-project or with a common history based on 
 `vimderbar.commonHistory` true/false set in brackets preferences.
 + Basic vim keybindings (hjkl, yy, dd, p, P, o, O, gg, G, etc.).
 + Search function (`/`) integrated with Brackets' native search.

@@ -3,6 +3,7 @@
 
 // holds vim ex commmand history in projectFile
 define(function (require, exports) {
+    "use strict";
     var ProjectManager = brackets.getModule("project/ProjectManager"),
         PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
         vimderbarPreferences = PreferencesManager.getExtensionPrefs("vimderbar"),
@@ -11,28 +12,6 @@ define(function (require, exports) {
         currentProject,
         useCommonVimHistory;
 
-    // Housekeeping
-    /**
-     * Clear commandHistory.
-     */
-    function resetHistory() {
-        commandHistory = [];
-        historyPosition = -1;
-        _persistHistory();
-    }
-    /**
-     * @private
-     * Switch history to another project.
-     * @param {String} project Project full path, used as lookup key in localStorage.
-     */
-    function _changeProject(project) {
-        if (useCommonVimHistory) {
-            currentProject = "common";
-        } else {
-            currentProject = project;
-        }
-        _fetchHistory();
-    }
     // Persistence
     /**
      * @private
@@ -40,6 +19,14 @@ define(function (require, exports) {
      */
     function _persistHistory() {
         localStorage.setItem("fontface.vimderbar.history." + currentProject, JSON.stringify(commandHistory));
+    }
+    /**
+     * Clear commandHistory.
+     */
+    function resetHistory() {
+        commandHistory = [];
+        historyPosition = -1;
+        _persistHistory();
     }
     /**
      * @private
@@ -58,6 +45,20 @@ define(function (require, exports) {
         } else {
             resetHistory();
         }
+    }
+    // Housekeeping
+    /**
+     * @private
+     * Switch history to another project.
+     * @param {String} project Project full path, used as lookup key in localStorage.
+     */
+    function _changeProject(project) {
+        if (useCommonVimHistory) {
+            currentProject = "common";
+        } else {
+            currentProject = project;
+        }
+        _fetchHistory();
     }
     // Status Bar Interaction
     /**
