@@ -92,7 +92,10 @@ define(function (require, exports) {
     function _onKeypress(key) {
         // fix broken '/' search by calling cmd.find
         if (key === '/') {
-            CommandManager.execute("cmd.find");
+            var currentCommand = cm.getVimCommandKeys();
+            if (currentCommand.length === 0) {
+                CommandManager.execute("cmd.find");
+            }
         }
         // prevent esc from being displayed or clearing the dialog keys
         if (key.match(/Esc/)) {

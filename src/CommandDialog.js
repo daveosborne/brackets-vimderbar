@@ -25,6 +25,7 @@ define(function (require, exports) {
         cm.openDialog = CodeMirror.openDialog;
         cm.updateVimStatus = CodeMirror.updateVimStatus;
         cm.clearVimCommandKeys = CodeMirror.clearVimCommandKeys;
+        cm.getVimCommandKeys = CodeMirror.getVimCommandKeys;
         cm.updateVimCommandKeys = CodeMirror.updateVimCommandKeys;
 
         cm.off("vim-mode-change");
@@ -159,6 +160,12 @@ define(function (require, exports) {
         }
     }
     /**
+     * Get current command from status bar.
+     */
+    function getVimCommandKeys() {
+        return $dialog.children(".vimderbar-command-keys").text();
+    }
+    /**
      * Clear current command from status bar.
      */
     function clearVimCommandKeys() {
@@ -168,6 +175,7 @@ define(function (require, exports) {
     CodeMirror.openDialog = openDialog;
     CodeMirror.updateVimStatus = updateVimStatus;
     CodeMirror.updateVimCommandKeys = updateVimCommandKeys;
+    CodeMirror.getVimCommandKeys = getVimCommandKeys;
     CodeMirror.clearVimCommandKeys = clearVimCommandKeys;
 
     exports.init = init;
