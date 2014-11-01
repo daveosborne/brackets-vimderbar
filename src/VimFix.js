@@ -6,18 +6,20 @@
 define(function (require, exports) {
     "use strict";
 
-    var CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
+    var CodeHintManager = brackets.getModule("editor/CodeHintManager"),
+        CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
         CommandManager = brackets.getModule("command/CommandManager"),
         DocumentManager = brackets.getModule("document/DocumentManager"),
+        MainViewManager = brackets.getModule("view/MainViewManager"),
         EditorManager = brackets.getModule("editor/EditorManager"),
         Commands = brackets.getModule("command/Commands"),
+        commandDone = false,
         CommandDialog,
         cm,
         fecm,
         precm,
         vimMode,
-        controller,
-        commandDone;
+        controller;
 
     /**
      * Initialize Vim fixes for CodeMirror -> Brackets integration.
@@ -66,18 +68,19 @@ define(function (require, exports) {
             CodeMirror.commands.save(cm);
         });
         CodeMirror.Vim.defineEx("bnext", "bn", function (cm) {
-            var file = DocumentManager.getNextPrevFile(1);
-            CommandManager.execute(Commands.FILE_OPEN, {
-                fullPath: file.fullPath
-            });
-            cm.focus();
+            CommandManager.execute(Commands.CMD_OPEN, { fullPath: MainViewManager.traverseToNextViewByMRU(1).file._path });
         });
         CodeMirror.Vim.defineEx("bprev", "bp", function (cm) {
-            var file = DocumentManager.getNextPrevFile(-1);
-            CommandManager.execute(Commands.FILE_OPEN, {
-                fullPath: file.fullPath
-            });
-            cm.focus();
+            CommandManager.execute(Commands.CMD_OPEN, { fullPath: MainViewManager.traverseToNextViewByMRU(-1).file._path });
+        });
+        CodeMirror.Vim.defineEx("vsplit", "vs", function (cm) {
+            CommandManager.execute(Commands.CMD_SPLITVIEW_VERTICAL);
+        });
+        CodeMirror.Vim.defineEx("split", "sp", function (cm) {
+            CommandManager.execute(Commands.CMD_SPLITVIEW_HORIZONTAL);
+        });
+        CodeMirror.Vim.defineEx("only", "on", function (cm) {
+            CommandManager.execute(Commands.CMD_SPLITVIEW_NONE);
         });
         CodeMirror.Vim.defineEx("clearhistory", "clearhistory", function (cm) {
             CommandDialog.resetHistory();
@@ -90,15 +93,7 @@ define(function (require, exports) {
      * @param {String} key Key pressed.
      */
     function _onKeypress(key) {
-        // fix broken '/' search by calling cmd.find
-        if (key === '/') {
-            var currentCommand = cm.getVimCommandKeys();
-            if (currentCommand.length === 0) {
-                CommandManager.execute("cmd.find");
-            }
-        }
-        // prevent esc from being displayed or clearing the dialog keys
-        if (key.match(/Esc/)) {
+        if (key === "/" || key === ":" || key === "?") {
             return;
         }
         cm.updateVimCommandKeys(key);
@@ -113,7 +108,7 @@ define(function (require, exports) {
     /**
      * @private
      * Close inline editor when esc is pressed outside of insert/replace mode.
-     * @param {CodeMirror} cm Current CodeMirror instance. Unused.
+     * @param {CodeMirror} cm Current CodeMirror instance.
      * @param {jQuery.Event} e KeyEvent event object.
      */
     function _escKeyEvent(cm, e) {
@@ -131,6 +126,10 @@ define(function (require, exports) {
                 } else if (currentFullEditor !== activeEditor) {
                     CodeMirror.commands.close(cm);
                 }
+            } else {
+                if (currentFullEditor !== activeEditor) {
+                    CodeMirror.commands.close(cm);
+                }
             }
         }
     }
@@ -139,11 +138,11 @@ define(function (require, exports) {
      * @param {CodeMirror} cm Current CodeMirror instance.
      */
     function attachVimderbar(cm) {
-        cm.off("keydown", _escKeyEvent);
+        cm.off("keydown");
         cm.on("keydown", _escKeyEvent);
-        cm.off("vim-keypress", _onKeypress);
+        cm.off("vim-keypress");
         cm.on("vim-keypress", _onKeypress);
-        cm.off("vim-command-done", _onCommandDone);
+        cm.off("vim-command-done");
         cm.on("vim-command-done", _onCommandDone);
     }
     /**
@@ -152,33 +151,6 @@ define(function (require, exports) {
      */
     function changeDocument(cm) {
         attachVimderbar(cm);
-    }
-    // TODO: fix insert cursor in inline editors. 
-    //    (open inline editor in normal mode. press i from within the inline editor.
-    //     notice that the cursor remains "fat".) 
-    //    fixing this bug will likely fix the visual mode bug described below.
-
-    /**
-     * Set CodeMirror KeyMap based on mode changes.
-     * @param {String} map New map name.
-     */
-    function setVimKeyMap(map) {
-        var mode;
-        fecm.setOption("keyMap", map);
-        switch (map) {
-        case "vim-insert":
-            mode = "insert";
-            break;
-        case "vim-replace":
-            fecm.toggleOverwrite(true);
-            mode = "replace";
-            break;
-        default:
-            mode = "normal";
-        }
-        CodeMirror.signal(fecm, "vim-mode-change", {
-            mode: mode
-        });
     }
 
     exports.init = init;

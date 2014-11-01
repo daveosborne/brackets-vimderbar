@@ -105,7 +105,7 @@ define(function (require, exports, module) {
         var activeEditor = EditorManager.getActiveEditor();
         if (activeEditor) {
             var cm = activeEditor._codeMirror;
-            if (cm !== null) {
+            if (cm) {
                 CommandDialog.init(cm);
                 VimFix.init(cm, CommandDialog, {
                     enable: _enableVimderbar,
