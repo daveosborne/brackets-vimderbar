@@ -44,7 +44,9 @@ input.vimderbar-command:focus {
     background: rgb(211, 205, 105);
 }
 /* using admittedly insane selectors to avoid inline editor inheriting fat-cursor... made default color neutral */
-/* */
+.content .CodeMirror.cm-keymap-fat-cursor .CodeMirror-cursors {
+  z-index: 3;
+}
 .content .CodeMirror.cm-keymap-fat-cursor .CodeMirror-cursor {
     border-left: none;
     background: rgb(145, 145, 145);

@@ -43,22 +43,11 @@ define(function (require, exports) {
      */
     function escKeyEvent(cm, e) {
         if (e.keyCode === 27) {
-            var vimMode = cm.getOption("keyMap");
             var currentFullEditor = EditorManager.getCurrentFullEditor();
             var activeEditor = EditorManager.getActiveEditor();
             CodeMirror.e_stop(e);
-            if (cm.state.vim) {
-                if (cm.state.vim.visualMode) {
-                    CodeMirror.keyMap.vim.Esc(cm);
-                } else if (vimMode === "vim-insert" || vimMode === "vim-replace") {
-                    CodeMirror.keyMap["vim-insert"].Esc(cm);
-                } else if (currentFullEditor !== activeEditor) {
-                    CodeMirror.commands.close(cm);
-                }
-            } else {
-                if (currentFullEditor !== activeEditor) {
-                    CodeMirror.commands.close(cm);
-                }
+            if (currentFullEditor !== activeEditor && !cm.state.vim.insertMode && !cm.state.vim.visualMode) {
+                CodeMirror.commands.close(cm);
             }
         }
     }

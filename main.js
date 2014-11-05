@@ -67,6 +67,7 @@ define(function (require, exports, module) {
         setKeyBindings(cm);
         cm.setOption("showCursorWhenSelecting", true);
         cm.setOption("keyMap", "vim");
+        cm.setOption("vimMode", true);
     }
     /**
      * @private
@@ -77,6 +78,7 @@ define(function (require, exports, module) {
         cm.setOption("extraKeys", null);
         cm.setOption("showCursorWhenSelecting", false);
         cm.setOption("keyMap", "default");
+        cm.setOption("vimMode", false);
     }
     /**
      * @private
@@ -164,11 +166,9 @@ define(function (require, exports, module) {
         brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
             $(EditorManager).on("activeEditorChange", handleShowHideVimderbar);
         });
-
     }
 
     AppInit.htmlReady(function () {
         init();
     });
-
 });
