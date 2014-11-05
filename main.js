@@ -25,24 +25,29 @@ define(function (require, exports, module) {
         firstInit = true,
         $vimderbar;
 
-    /**     
+    /**
+     * @private
+     * Return tab string based on preferences
+     */
+    function getTabSpaces() {
+        var i, spaces = "";
+        for (i = 0; i < PreferencesManager.get("spaceUnits"); i++) {
+            spaces += " ";
+        }
+        return spaces;
+    }
+    /**
      * @private
      * Set CodeMirror options regarding tabs based on current preferences
      * @param {CodeMirror} cm Current CodeMirror editor instance.
      */
-    function _setKeyBindings(cm) {
+    function setKeyBindings(cm) {
         var extraKeys = vimderbarPreferences.get("extraKeys") || {};
         cm.setOption("tabSize", PreferencesManager.get("tabSize"));
         if (!PreferencesManager.get("useTabChar")) {
             cm.setOption("indentWithTabs", false);
             extraKeys.Tab = function (cm) {
-                var spaces = "";
-                var i;
-                var numSpaces = PreferencesManager.get("spaceUnits");
-                for (i = 0; i < numSpaces; i++) {
-                    spaces += " ";
-                }
-                cm.replaceSelection(spaces);
+                cm.replaceSelection(getTabSpaces());
             };
             cm.setOption("extraKeys", extraKeys);
         } else {
@@ -56,10 +61,10 @@ define(function (require, exports, module) {
      * Set CodeMirror options to enable Vim.
      * @param {CodeMirror} cm Current CodeMirror editor instance.
      */
-    function _enableVimderbar(cm) {
+    function enableVimderbar(cm) {
         // I know that _codeMirror is deprecated, but I couldn't get
         // this to work in any other way. Will continue to investigate.
-        _setKeyBindings(cm);
+        setKeyBindings(cm);
         cm.setOption("showCursorWhenSelecting", true);
         cm.setOption("keyMap", "vim");
     }
@@ -68,7 +73,7 @@ define(function (require, exports, module) {
      * Set CodeMirror options back to default.
      * @param {CodeMirror} cm Current CodeMirror editor instance.
      */
-    function _disableVimderbar(cm) {
+    function disableVimderbar(cm) {
         cm.setOption("extraKeys", null);
         cm.setOption("showCursorWhenSelecting", false);
         cm.setOption("keyMap", "default");
@@ -78,21 +83,19 @@ define(function (require, exports, module) {
      * Show Vimderbar status, enable Vimderbar on current CodeMirror instance.
      * @param {CodeMirror} cm Current CodeMirror editor instance.
      */
-    function _showVimderbar(cm) {
+    function showVimderbar(cm) {
         $vimderbar.show();
-        VimFix.changeDocument(cm);
-        CommandDialog.changeDocument(cm);
         cm.updateVimStatus("Normal");
-        _enableVimderbar(cm);
+        enableVimderbar(cm);
     }
     /**
      * @private
      * Hide Vimderbar status, disable Vimderbar.
      * @param {CodeMirror} cm Current CodeMirror editor instance.
      */
-    function _hideVimderbar(cm) {
+    function hideVimderbar(cm) {
         $vimderbar.hide();
-        _disableVimderbar(cm);
+        disableVimderbar(cm);
         $(EditorManager).trigger({
             type: "vimderbarDisabled"
         });
@@ -101,21 +104,18 @@ define(function (require, exports, module) {
      * @private
      * Hide or show Vimderbar on active editor window based on localStorage
      */
-    function _handleShowHideVimderbar() {
+    function handleShowHideVimderbar() {
         var activeEditor = EditorManager.getActiveEditor();
         if (activeEditor) {
             var cm = activeEditor._codeMirror;
             if (cm) {
                 CommandDialog.init(cm);
-                VimFix.init(cm, CommandDialog, {
-                    enable: _enableVimderbar,
-                    disable: _disableVimderbar
-                });
+                VimFix.init(cm, CommandDialog);
                 if (vimderbarPreferences.get("enabled")) {
-                    _showVimderbar(cm);
+                    showVimderbar(cm);
                     CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
                 } else {
-                    _hideVimderbar(cm);
+                    hideVimderbar(cm);
                     CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
                 }
             }
@@ -127,7 +127,7 @@ define(function (require, exports, module) {
      */
     function toggleActive() {
         vimderbarPreferences.set("enabled", !vimderbarPreferences.get("enabled"));
-        _handleShowHideVimderbar();
+        handleShowHideVimderbar();
     }
     /**
      * Initialize Vimderbar plugin; setup menu, load vim.js from CodeMirror,
@@ -145,11 +145,11 @@ define(function (require, exports, module) {
             var activeEditor = EditorManager.getActiveEditor();
             if (activeEditor) {
                 var cm = activeEditor._codeMirror;
-                _setKeyBindings(cm);
+                setKeyBindings(cm);
             }
         });
         vimderbarPreferences.on("change", function () {
-            _handleShowHideVimderbar();
+            handleShowHideVimderbar();
         });
         CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(vimderbarEnabled);
 
@@ -162,10 +162,7 @@ define(function (require, exports, module) {
 
         // import vim keymap from brackets source.
         brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
-            $(EditorManager).on("activeEditorChange", _handleShowHideVimderbar);
-            $(EditorManager).one("activeEditorChange", function () {
-                _handleShowHideVimderbar();
-            });
+            $(EditorManager).on("activeEditorChange", handleShowHideVimderbar);
         });
 
     }

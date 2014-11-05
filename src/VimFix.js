@@ -15,23 +15,75 @@ define(function (require, exports) {
         Commands = brackets.getModule("command/Commands"),
         commandDone = false,
         CommandDialog,
-        cm,
-        fecm,
-        precm,
-        vimMode,
-        controller;
+        cm;
 
+    /**
+     * @private
+     * Handler for CodeMirror's vim.js vim-keypress event. Filters and updates keys, clears commands when next command input.
+     * @param {String} key Key pressed.
+     */
+    function onKeypress(key) {
+        if (key === "/" || key === ":" || key === "?" || key === "u") {
+            return;
+        }
+        cm.updateVimCommandKeys(key);
+    }
+    /**
+     * @private
+     * Handler for CodeMirror's vim.js vim-command-done event. Sets commandDone so current command is cleared on next keypress.
+     */
+    function onCommandDone() {
+        cm.clearVimCommandKeys();
+    }
+    /**
+     * @private
+     * Close inline editor when esc is pressed outside of insert/replace mode.
+     * @param {CodeMirror} cm Current CodeMirror instance.
+     * @param {jQuery.Event} e KeyEvent event object.
+     */
+    function escKeyEvent(cm, e) {
+        if (e.keyCode === 27) {
+            var vimMode = cm.getOption("keyMap");
+            var currentFullEditor = EditorManager.getCurrentFullEditor();
+            var activeEditor = EditorManager.getActiveEditor();
+            CodeMirror.e_stop(e);
+            if (cm.state.vim) {
+                if (cm.state.vim.visualMode) {
+                    CodeMirror.keyMap.vim.Esc(cm);
+                } else if (vimMode === "vim-insert" || vimMode === "vim-replace") {
+                    CodeMirror.keyMap["vim-insert"].Esc(cm);
+                } else if (currentFullEditor !== activeEditor) {
+                    CodeMirror.commands.close(cm);
+                }
+            } else {
+                if (currentFullEditor !== activeEditor) {
+                    CodeMirror.commands.close(cm);
+                }
+            }
+        }
+    }
+    /**
+     * Attach events to current CodeMirror instance.
+     * @param {CodeMirror} cm Current CodeMirror instance.
+     */
+    function attachVimderbar(cm) {
+        cm.off("keydown", escKeyEvent);
+        cm.on("keydown", escKeyEvent);
+        cm.off("vim-keypress", onKeypress);
+        cm.on("vim-keypress", onKeypress);
+        cm.off("vim-command-done", onCommandDone);
+        cm.on("vim-command-done", onCommandDone);
+    }
     /**
      * Initialize Vim fixes for CodeMirror -> Brackets integration.
      * @param {CodeMirror} _cm Current CodeMirror instance.
      * @param {CommandDialog} _CommandDialog Current CommandDialog instance.
-     * @param {Object} _controller Vim enable/disable controller functions.
      */
-    function init(_cm, _CommandDialog, _controller) {
+    function init(_cm, _CommandDialog) {
         CommandDialog = _CommandDialog;
         cm = _cm;
-        controller = _controller;
 
+        attachVimderbar(cm);
         // CodeMirror -> Brackets Command Hooks
         CodeMirror.commands.save = function () {
             CommandManager.execute("file.save");
@@ -47,7 +99,7 @@ define(function (require, exports) {
                 CommandManager.execute("file.close");
             }
         };
-        CodeMirror.commands.open = function () {
+        CodeMirror.commands.open = function (name) {
             // used to be "file.open" because quickOpen would automatically close
             // following the user's push of Enter key to submit Open command (":e[Enter]")
             // setTimeout meant to give the user a moment to let go of the Enter key.
@@ -62,7 +114,7 @@ define(function (require, exports) {
             CodeMirror.commands.close(cm);
         });
         CodeMirror.Vim.defineEx("edit", "e", function (cm) {
-            CodeMirror.commands.open(cm);
+            CodeMirror.commands.open();
         });
         CodeMirror.Vim.defineEx("write", "w", function (cm) {
             CodeMirror.commands.save(cm);
@@ -87,73 +139,7 @@ define(function (require, exports) {
             cm.focus();
         });
     }
-    /**
-     * @private
-     * Handler for CodeMirror's vim.js vim-keypress event. Filters and updates keys, clears commands when next command input.
-     * @param {String} key Key pressed.
-     */
-    function _onKeypress(key) {
-        if (key === "/" || key === ":" || key === "?") {
-            return;
-        }
-        cm.updateVimCommandKeys(key);
-    }
-    /**
-     * @private
-     * Handler for CodeMirror's vim.js vim-command-done event. Sets commandDone so current command is cleared on next keypress.
-     */
-    function _onCommandDone() {
-        cm.clearVimCommandKeys();
-    }
-    /**
-     * @private
-     * Close inline editor when esc is pressed outside of insert/replace mode.
-     * @param {CodeMirror} cm Current CodeMirror instance.
-     * @param {jQuery.Event} e KeyEvent event object.
-     */
-    function _escKeyEvent(cm, e) {
-        if (e.keyCode === 27) {
-            CodeMirror.e_stop(e);
-
-            vimMode = cm.getOption("keyMap");
-            var currentFullEditor = EditorManager.getCurrentFullEditor();
-            var activeEditor = EditorManager.getActiveEditor();
-            if (cm.state.vim) {
-                if (cm.state.vim && cm.state.vim.visualMode) {
-                    CodeMirror.keyMap.vim.Esc(cm);
-                } else if (vimMode === "vim-insert" || vimMode === "vim-replace") {
-                    CodeMirror.keyMap["vim-insert"].Esc(cm);
-                } else if (currentFullEditor !== activeEditor) {
-                    CodeMirror.commands.close(cm);
-                }
-            } else {
-                if (currentFullEditor !== activeEditor) {
-                    CodeMirror.commands.close(cm);
-                }
-            }
-        }
-    }
-    /**
-     * Attach events to current CodeMirror instance.
-     * @param {CodeMirror} cm Current CodeMirror instance.
-     */
-    function attachVimderbar(cm) {
-        cm.off("keydown");
-        cm.on("keydown", _escKeyEvent);
-        cm.off("vim-keypress");
-        cm.on("vim-keypress", _onKeypress);
-        cm.off("vim-command-done");
-        cm.on("vim-command-done", _onCommandDone);
-    }
-    /**
-     * Change current document, attach events to new editor.
-     * @param {CodeMirror} cm CodeMirror instance to attach to.
-     */
-    function changeDocument(cm) {
-        attachVimderbar(cm);
-    }
 
     exports.init = init;
-    exports.changeDocument = changeDocument;
     exports.attachVimderbar = attachVimderbar;
 });

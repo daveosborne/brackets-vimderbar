@@ -17,7 +17,7 @@ define(function (require, exports) {
      * @private
      * Store current history in localStorage.
      */
-    function _persistHistory() {
+    function persistHistory() {
         localStorage.setItem("fontface.vimderbar.history." + currentProject, JSON.stringify(commandHistory));
     }
     /**
@@ -26,13 +26,13 @@ define(function (require, exports) {
     function resetHistory() {
         commandHistory = [];
         historyPosition = -1;
-        _persistHistory();
+        persistHistory();
     }
     /**
      * @private
      * Retrieve current history from localStorage.
      */
-    function _fetchHistory() {
+    function fetchHistory() {
         historyPosition = -1;
         var history = localStorage.getItem("fontface.vimderbar.history." + currentProject);
         if (history) {
@@ -52,13 +52,13 @@ define(function (require, exports) {
      * Switch history to another project.
      * @param {String} project Project full path, used as lookup key in localStorage.
      */
-    function _changeProject(project) {
+    function changeProject(project) {
         if (useCommonVimHistory) {
             currentProject = "common";
         } else {
             currentProject = project;
         }
-        _fetchHistory();
+        fetchHistory();
     }
     // Status Bar Interaction
     /**
@@ -72,7 +72,7 @@ define(function (require, exports) {
         }
         commandHistory.unshift(command);
         historyPosition = -1;
-        _persistHistory();
+        persistHistory();
     }
     /**
      * Get the previous ExCommand in history, move position index.
@@ -108,21 +108,21 @@ define(function (require, exports) {
      */
     function init() {
         useCommonVimHistory = vimderbarPreferences.get("commonHistory");
-        _changeProject(ProjectManager.getProjectRoot().fullPath);
+        changeProject(ProjectManager.getProjectRoot().fullPath);
 
         $(ProjectManager).on("projectOpen", function () {
-            _changeProject(ProjectManager.getProjectRoot().fullPath);
+            changeProject(ProjectManager.getProjectRoot().fullPath);
         });
         vimderbarPreferences.on("change", function () {
             useCommonVimHistory = vimderbarPreferences.get("commonHistory");
-            _changeProject(ProjectManager.getProjectRoot().fullPath);
+            changeProject(ProjectManager.getProjectRoot().fullPath);
         });
     }
 
-    exports.init = init;
+    exports.resetHistory = resetHistory;
     exports.add = add;
     exports.getPrevHistoryItem = getPrevHistoryItem;
     exports.getNextHistoryItem = getNextHistoryItem;
-    exports.resetHistory = resetHistory;
     exports.exitHistory = exitHistory;
+    exports.init = init;
 });

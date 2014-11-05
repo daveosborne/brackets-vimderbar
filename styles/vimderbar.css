@@ -40,9 +40,8 @@ input.vimderbar-command:focus {
     right: 10px;
 }
 .cm-searching {
-    background: rgb(255, 255, 0);
-    background: rgba(255, 255, 0, .4);
-    /* doesn't work ?*/
+    color: #000000 !important;
+    background: rgb(211, 205, 105);
 }
 /* using admittedly insane selectors to avoid inline editor inheriting fat-cursor... made default color neutral */
 /* */
