@@ -34,16 +34,22 @@ has been pressed.
 + Macro functionality restored.
 
 ## Limitations
-+ `:` commands are sloppy, only one can be performed at a single time.
-+ Can't yet perform complex `:` commands (like `:1,8d` or even `:wq`).
++ `:` is limited to a single command (no :wq).
++ Can't yet perform complex `:` commands (like `:1,8d`).
 
 ## Contributing
-Please do, by all means, hack on this extension. For coding conventions,
+Please do, by all means, hack on this extension and send me PRs. For coding conventions,
 review the 
 [Brackets Coding Conventions]
 (https://github.com/adobe/brackets/wiki/Brackets%20Coding%20Conventions).
 
+## Changelog
+#### 0.7.1
++ changed Vimderbar enable command to 'view.enableVimderbar'
++ cleaned up enable/disable logic and editor switching logic
++ added css to override CodeMirror default colors
+
 Thanks!
 
-## Licence
-I'd say WTFPL, but the MIT disclaimers are important(see main.js).
+## License
+See [LICENSE.txt](LICENSE.txt)
