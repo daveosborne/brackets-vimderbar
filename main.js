@@ -22,7 +22,7 @@ define(function (require, exports, module) {
     var panelHtml = require("text!templates/bottom-panel.html");
     var VimFix = require("./src/VimFix");
     var CommandDialog = require("./src/CommandDialog");
-    var TOGGLE_VIMDERBAR_ID = "fontface.show-vimderbar.view.vimderbar";
+    var TOGGLE_VIMDERBAR_ID = "view.enableVimderbar";
     var firstInit = true;
     var $vimderbar;
 
