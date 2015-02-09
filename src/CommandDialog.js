@@ -1,26 +1,26 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, $, brackets, Mustache*/
 
-// Handles status bar interactions 
+// Handles status bar interactions
 define(function (require, exports) {
     "use strict";
 
-    var CommandManager = brackets.getModule("command/CommandManager"),
-        CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
-        ExCommandHistory = require("./ExCommandHistory"),
-        cm,
-        callback,
-        $dialog,
-        $input,
-        inHistory;
-   
+    var CommandManager = brackets.getModule("command/CommandManager");
+    var CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror");
+    var ExCommandHistory = require("./ExCommandHistory");
+    var cm;
+    var callback;
+    var $dialog;
+    var $input;
+    var inHistory;
+
     /**
      * Update vim mode and set status bar
      */
     function updateMode(event) {
         CodeMirror.updateVimStatus(event.mode);
     }
-    /**     
+    /**
      * Attach Vim functions to current CodeMirror instance,
      * add watch for mode changes on current instance.
      * @param {CodeMirror} _cm The current CodeMirror instance.
@@ -37,7 +37,7 @@ define(function (require, exports) {
         cm.off("vim-mode-change", updateMode);
         cm.on("vim-mode-change", updateMode);
     }
-    /**     
+    /**
      * Setup Vim status bar, hook events and setup ExCommand history.
      * @param {CodeMirror} _cm The current CodeMirror instance.
      */

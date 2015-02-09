@@ -6,16 +6,15 @@
 define(function (require, exports) {
     "use strict";
 
-    var CodeHintManager = brackets.getModule("editor/CodeHintManager"),
-        CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
-        CommandManager = brackets.getModule("command/CommandManager"),
-        DocumentManager = brackets.getModule("document/DocumentManager"),
-        MainViewManager = brackets.getModule("view/MainViewManager"),
-        EditorManager = brackets.getModule("editor/EditorManager"),
-        Commands = brackets.getModule("command/Commands"),
-        commandDone = false,
-        CommandDialog,
-        cm;
+    var CodeHintManager = brackets.getModule("editor/CodeHintManager");
+    var CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror");
+    var CommandManager = brackets.getModule("command/CommandManager");
+    var DocumentManager = brackets.getModule("document/DocumentManager");
+    var MainViewManager = brackets.getModule("view/MainViewManager");
+    var EditorManager = brackets.getModule("editor/EditorManager");
+    var Commands = brackets.getModule("command/Commands");
+    var commandDone = false;
+    var cm;
 
     /**
      * @private
@@ -43,43 +42,24 @@ define(function (require, exports) {
      */
     function escKeyEvent(cm, e) {
         if (e.keyCode === 27) {
-            var currentFullEditor = EditorManager.getCurrentFullEditor();
-            var activeEditor = EditorManager.getActiveEditor();
+            var inlineFocused = EditorManager.getFocusedInlineWidget();
             CodeMirror.e_stop(e);
-            if (currentFullEditor !== activeEditor && !cm.state.vim.insertMode && !cm.state.vim.visualMode) {
-                CodeMirror.commands.close(cm);
+            if (inlineFocused && !cm.state.vim.insertMode && !cm.state.vim.visualMode) {
+                CodeMirror.commands.close();
             }
         }
     }
     /**
-     * Attach events to current CodeMirror instance.
-     * @param {CodeMirror} cm Current CodeMirror instance.
+     * Set up CodeMirror Ex commands
      */
-    function attachVimderbar(cm) {
-        cm.off("keydown", escKeyEvent);
-        cm.on("keydown", escKeyEvent);
-        cm.off("vim-keypress", onKeypress);
-        cm.on("vim-keypress", onKeypress);
-        cm.off("vim-command-done", onCommandDone);
-        cm.on("vim-command-done", onCommandDone);
-    }
-    /**
-     * Initialize Vim fixes for CodeMirror -> Brackets integration.
-     * @param {CodeMirror} _cm Current CodeMirror instance.
-     * @param {CommandDialog} _CommandDialog Current CommandDialog instance.
-     */
-    function init(_cm, _CommandDialog) {
-        CommandDialog = _CommandDialog;
-        cm = _cm;
-
-        attachVimderbar(cm);
+    function setExCommands() {
         // CodeMirror -> Brackets Command Hooks
         CodeMirror.commands.save = function () {
             CommandManager.execute("file.save");
         };
         CodeMirror.commands.close = function () {
-            var hostEditor = EditorManager.getCurrentFullEditor(),
-                inlineFocused = EditorManager.getFocusedInlineWidget();
+            var hostEditor = EditorManager.getCurrentFullEditor();
+            var inlineFocused = EditorManager.getFocusedInlineWidget();
             if (inlineFocused) {
                 // inline editor exists & is in focus. close it.
                 EditorManager.closeInlineWidget(hostEditor, inlineFocused);
@@ -123,12 +103,24 @@ define(function (require, exports) {
         CodeMirror.Vim.defineEx("only", "on", function (cm) {
             CommandManager.execute(Commands.CMD_SPLITVIEW_NONE);
         });
-        CodeMirror.Vim.defineEx("clearhistory", "clearhistory", function (cm) {
-            CommandDialog.resetHistory();
-            cm.focus();
-        });
+    }
+    /**
+     * Initialize Vim fixes for CodeMirror -> Brackets integration.
+     * @param {CodeMirror} _cm Current CodeMirror instance.
+     */
+    function init(_cm) {
+        cm = _cm;
+        cm.on("keydown", escKeyEvent);
+        cm.on("vim-keypress", onKeypress);
+        cm.on("vim-command-done", onCommandDone);
+        setExCommands();
+    }
+    function destroy(_cm) {
+        _cm.off("keydown", escKeyEvent);
+        _cm.off("vim-keypress", onKeypress);
+        _cm.off("vim-command-done", onCommandDone);
     }
 
     exports.init = init;
-    exports.attachVimderbar = attachVimderbar;
+    exports.destroy = destroy;
 });

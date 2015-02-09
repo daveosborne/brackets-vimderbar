@@ -4,13 +4,14 @@
 // holds vim ex commmand history in projectFile
 define(function (require, exports) {
     "use strict";
-    var ProjectManager = brackets.getModule("project/ProjectManager"),
-        PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
-        vimderbarPreferences = PreferencesManager.getExtensionPrefs("vimderbar"),
-        commandHistory,
-        historyPosition,
-        currentProject,
-        useCommonVimHistory;
+
+    var ProjectManager = brackets.getModule("project/ProjectManager");
+    var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
+    var vimderbarPreferences = PreferencesManager.getExtensionPrefs("vimderbar");
+    var commandHistory;
+    var historyPosition;
+    var currentProject;
+    var useCommonVimHistory;
 
     // Persistence
     /**
