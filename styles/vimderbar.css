@@ -43,16 +43,38 @@ input.vimderbar-command:focus {
     color: #000000 !important;
     background: rgb(211, 205, 105);
 }
-/* using admittedly insane selectors to avoid inline editor inheriting fat-cursor... made default color neutral */
-.content .CodeMirror.cm-keymap-fat-cursor .CodeMirror-cursors {
+.CodeMirror.cm-fat-cursor div.CodeMirror-cursors {
   z-index: 3;
 }
-.content .CodeMirror.cm-keymap-fat-cursor .CodeMirror-cursor {
-    border-left: none;
-    background: rgb(145, 145, 145);
-    background: rgba(145, 145, 145, 0.5);
+/* have to use an id selector here because of a global left border override somewhere in the brackets code (not a css file), also it's set as !important, so we have to use !imporant here too, this removes the border from the fat cursor */
+#editor-holder .CodeMirror.cm-fat-cursor div.CodeMirror-cursor {
+  border: none !important;
+  background: rgb(195, 195, 195);
+  background: rgba(195, 195, 195, 0.5); 
 }
-.content .CodeMirror.cm-keymap-fat-cursor .inline-text-editor .CodeMirror:not(.cm-keymap-fat-cursor) .CodeMirror-cursor {
+.cm-animate-fat-cursor {
+  -webkit-animation: vimderbar-blink 1.06s steps(1) infinite;
+  -moz-animation: vimderbar-blink 1.06s steps(1) infinite;
+  animation: vimderbar-blink 1.06s steps(1) infinite;
+}
+@-moz-keyframes vimderbar-blink {
+  0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+  50% { background: none; }
+  100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+}
+@-webkit-keyframes vimderbar-blink {
+  0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+  50% { background: none; }
+  100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+}
+@keyframes vimderbar-blink {
+  0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+  50% { background: none; }
+  100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+}
+
+/* using admittedly insane selectors to avoid inline editor inheriting fat-cursor... made default color neutral */
+.CodeMirror.cm-fat-cursor .inline-text-editor .CodeMirror:not(.cm-fat-cursor) .CodeMirror-cursor {
     border-left: 1px solid black;
     background: none;
 }
