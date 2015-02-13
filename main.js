@@ -89,8 +89,6 @@ define(function (require, exports, module) {
      */
     function handleShowHideVimderbar($event, focusedEditor, lostEditor) {
         if (lostEditor) {
-            console.log('lost editor');
-            console.dir(lostEditor);
             var lostCm = lostEditor._codeMirror;
             if (lostCm) {
                VimFix.destroy(lostCm);
@@ -98,8 +96,6 @@ define(function (require, exports, module) {
             }
         }
         if (focusedEditor) {
-            console.log('focused editor');
-            console.dir(focusedEditor);
             var focusedCm = focusedEditor._codeMirror;
             if (focusedCm) {
                 CommandDialog.init(focusedCm);

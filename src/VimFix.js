@@ -68,7 +68,7 @@ define(function (require, exports) {
                 CommandManager.execute("file.close");
             }
         };
-        CodeMirror.commands.open = function (name) {
+        CodeMirror.commands.open = function () {
             // used to be "file.open" because quickOpen would automatically close
             // following the user's push of Enter key to submit Open command (":e[Enter]")
             // setTimeout meant to give the user a moment to let go of the Enter key.
