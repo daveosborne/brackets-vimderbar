@@ -42,8 +42,8 @@ define(function (require, exports) {
      */
     function escKeyEvent(cm, e) {
         if (e.keyCode === 27) {
+            e.stopImmediatePropagation();
             var inlineFocused = EditorManager.getFocusedInlineWidget();
-            CodeMirror.e_stop(e);
             if (inlineFocused && !cm.state.vim.insertMode && !cm.state.vim.visualMode) {
                 CodeMirror.commands.close();
             }

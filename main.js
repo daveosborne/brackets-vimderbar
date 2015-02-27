@@ -91,8 +91,8 @@ define(function (require, exports, module) {
         if (lostEditor) {
             var lostCm = lostEditor._codeMirror;
             if (lostCm) {
-               VimFix.destroy(lostCm);
-               disableVimderbar(lostCm);
+                VimFix.destroy(lostCm);
+                disableVimderbar(lostCm);
             }
         }
         if (focusedEditor) {
@@ -145,7 +145,7 @@ define(function (require, exports, module) {
 
         // import vim keymap from brackets source.
         brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
-            $(EditorManager).on("activeEditorChange", handleShowHideVimderbar);
+            EditorManager.on("activeEditorChange", handleShowHideVimderbar);
         });
     }
 

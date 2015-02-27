@@ -111,7 +111,7 @@ define(function (require, exports) {
         useCommonVimHistory = vimderbarPreferences.get("commonHistory");
         changeProject(ProjectManager.getProjectRoot().fullPath);
 
-        $(ProjectManager).on("projectOpen", function () {
+        ProjectManager.on("projectOpen", function () {
             changeProject(ProjectManager.getProjectRoot().fullPath);
         });
         vimderbarPreferences.on("change", function () {
