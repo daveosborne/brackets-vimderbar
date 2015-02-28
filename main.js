@@ -1,30 +1,30 @@
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, brackets, $, Mustache, localStorage*/
+/*jslint vars: true, plusplus: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define, brackets, $, Mustache, localStorage, setTimeout*/
 
 define(function (require, exports, module) {
     "use strict";
 
     // Brackets modules
     var AppInit = brackets.getModule("utils/AppInit");
+    var CodeMirror = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror");
+    var Commands = brackets.getModule("command/Commands");
     var CommandManager = brackets.getModule("command/CommandManager");
     var EditorManager = brackets.getModule("editor/EditorManager");
     var ExtensionUtils = brackets.getModule("utils/ExtensionUtils");
+    var MainViewManager = brackets.getModule("view/MainViewManager");
     var Menus = brackets.getModule("command/Menus");
     var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
     var WorkspaceManager = brackets.getModule("view/WorkspaceManager");
+    // Local modules
+    var StatusBar = require("./src/StatusBar");
     // Preferences
     var vimderbarPreferences = PreferencesManager.getExtensionPrefs("vimderbar");
     var vimderbarEnabled = vimderbarPreferences.get("enabled");
     var editorSpaces = PreferencesManager.get("spaceUnits");
     var useTabChar = PreferencesManager.get("useTabChar");
     var tabSize = PreferencesManager.get("tabSize");
-    // Vimderbar
-    var panelHtml = require("text!templates/bottom-panel.html");
-    var VimFix = require("./src/VimFix");
-    var CommandDialog = require("./src/CommandDialog");
+    // Constants
     var TOGGLE_VIMDERBAR_ID = "view.enableVimderbar";
-    var firstInit = true;
-    var $vimderbar;
 
     /**
      * @private
@@ -40,89 +40,159 @@ define(function (require, exports, module) {
     /**
      * @private
      * Set CodeMirror options regarding tabs based on current preferences
-     * @param {CodeMirror} cm Current CodeMirror editor instance.
+     * @param {CodeMirror} cm Current CodeMirror editor instance
      */
-    function setKeyBindings() {
-        var activeEditor = EditorManager.getActiveEditor();
-        if (activeEditor) {
-            var cm = activeEditor._codeMirror;
-            var extraKeys = vimderbarPreferences.get("extraKeys") || {};
-            cm.setOption("tabSize", PreferencesManager.get("tabSize"));
-            if (!PreferencesManager.get("useTabChar")) {
-                cm.setOption("indentWithTabs", false);
-                extraKeys.Tab = function (cm) {
-                    cm.replaceSelection(getTabSpaces());
-                };
-                cm.setOption("extraKeys", extraKeys);
-            } else {
-                cm.setOption("indentWithTabs", true);
-                cm.setOption("extraKeys", null);
+    function setKeyBindings(cm) {
+        var extraKeys = vimderbarPreferences.get("extraKeys") || {};
+        cm.setOption("tabSize", PreferencesManager.get("tabSize"));
+        if (!PreferencesManager.get("useTabChar")) {
+            cm.setOption("indentWithTabs", false);
+            extraKeys.Tab = function (cm) {
+                cm.replaceSelection(getTabSpaces());
+            };
+            cm.setOption("extraKeys", extraKeys);
+        } else {
+            cm.setOption("indentWithTabs", true);
+            cm.setOption("extraKeys", null);
+        }
+    }
+    /**
+     * @private
+     * Close inline editor when esc is pressed outside of insert/replace mode
+     * @param {CodeMirror} _cm Event CodeMirror instance
+     * @param {jQuery.Event} e KeyEvent event object
+     */
+    function escKeyEvent(cm, e) {
+        if (e.keyCode === 27) {
+            e.stopPropagation();
+            var inlineFocused = EditorManager.getFocusedInlineWidget();
+            if (inlineFocused) {
+                if (cm.state.vim && !cm.state.vim.insertMode && !cm.state.vim.visualMode) {
+                    CodeMirror.commands.close();
+                }
             }
         }
     }
     /**
      * @private
-     * Enable Vimderbar on current CodeMirror instance.
-     * @param {CodeMirror} cm Current CodeMirror editor instance.
+     * Enable Vimderbar on current CodeMirror instance
+     * @param {CodeMirror} cm Current CodeMirror editor instance
      */
     function enableVimderbar(cm) {
-        // I know that _codeMirror is deprecated, but I couldn't get
-        // this to work in any other way. Will continue to investigate.
+        cm.on("keydown", escKeyEvent);
         setKeyBindings(cm);
         cm.setOption("showCursorWhenSelecting", true);
         cm.setOption("keyMap", "vim");
         cm.setOption("vimMode", true);
+        $("#vimderbar").show();
     }
     /**
      * @private
-     * Disable Vimderbar.
-     * @param {CodeMirror} cm Current CodeMirror editor instance.
+     * Disable Vimderbar
+     * @param {CodeMirror} cm Current CodeMirror editor instance
      */
     function disableVimderbar(cm) {
+        cm.off("keydown", escKeyEvent);
         cm.setOption("showCursorWhenSelecting", false);
         cm.setOption("keyMap", "default");
         cm.setOption("vimMode", false);
+        $("#vimderbar").hide();
     }
     /**
      * @private
-     * Hide or show Vimderbar on active editor window based on localStorage
+     * Enable or disable Vimderbar on active editor window based on localStorage
      */
-    function handleShowHideVimderbar($event, focusedEditor, lostEditor) {
-        if (lostEditor) {
-            var lostCm = lostEditor._codeMirror;
-            if (lostCm) {
-                VimFix.destroy(lostCm);
-                disableVimderbar(lostCm);
-            }
+    function handleEditorChange(e, focused, lostFocus) {
+        if (lostFocus) {
+            disableVimderbar(lostFocus._codeMirror);
         }
-        if (focusedEditor) {
-            var focusedCm = focusedEditor._codeMirror;
-            if (focusedCm) {
-                CommandDialog.init(focusedCm);
-                VimFix.init(focusedCm);
-                if (vimderbarPreferences.get("enabled")) {
-                    $vimderbar.show();
-                    enableVimderbar(focusedCm);
-                    CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
-                } else {
-                    $vimderbar.hide();
-                    disableVimderbar(focusedCm);
-                    CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
-                }
-            }
+        if (vimderbarPreferences.get("enabled")) {
+            enableVimderbar(focused._codeMirror);
         }
-        WorkspaceManager.recomputeLayout();
     }
     /**
-     * Toggle Vimderbar on and off.
+     * @private
+     * Enable or disable Vimderbar based on preferences
+     */
+    function preferencesChange() {
+        var active = EditorManager.getActiveEditor();
+        if (active) {
+            var cm = active._codeMirror;
+            if (vimderbarPreferences.get("enabled")) {
+                enableVimderbar(cm);
+                CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(true);
+            } else {
+                disableVimderbar(cm);
+                CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
+            }
+            WorkspaceManager.recomputeLayout();
+        }
+    }
+    /**
+     * Toggle Vimderbar on and off
      */
     function toggleActive() {
         vimderbarPreferences.set("enabled", !vimderbarPreferences.get("enabled"));
-        handleShowHideVimderbar({}, EditorManager.getActiveEditor());
     }
     /**
+     * Set up CodeMirror Ex commands
+     */
+    function setExCommands() {
+        // CodeMirror -> Brackets Command Hooks
+        CodeMirror.commands.save = function () {
+            CommandManager.execute("file.save");
+        };
+        CodeMirror.commands.close = function () {
+            var hostEditor = EditorManager.getCurrentFullEditor();
+            var inlineFocused = EditorManager.getFocusedInlineWidget();
+            if (inlineFocused) {
+                // inline editor exists & is in focus. close it
+                EditorManager.closeInlineWidget(hostEditor, inlineFocused);
+            } else {
+                // no inline editor is in focus so just close the document
+                CommandManager.execute("file.close");
+            }
+        };
+        CodeMirror.commands.open = function () {
+            // used to be "file.open" because quickOpen would automatically close
+            // following the user's push of Enter key to submit Open command (":e[Enter]")
+            // setTimeout meant to give the user a moment to let go of the Enter key
+            setTimeout(function () {
+                CommandManager.execute("navigate.quickOpen");
+            }, 150);
+        };
+
+        // Ex Command Definitions
+        CodeMirror.Vim.defineEx("quit", "q", function (cm) {
+            MainViewManager.focusActivePane();
+            CodeMirror.commands.close(cm);
+        });
+        CodeMirror.Vim.defineEx("edit", "e", function (cm) {
+            CodeMirror.commands.open();
+        });
+        CodeMirror.Vim.defineEx("write", "w", function (cm) {
+            CodeMirror.commands.save(cm);
+        });
+        CodeMirror.Vim.defineEx("bnext", "bn", function (cm) {
+            CommandManager.execute(Commands.CMD_OPEN, { fullPath: MainViewManager.traverseToNextViewByMRU(1).file._path });
+        });
+        CodeMirror.Vim.defineEx("bprev", "bp", function (cm) {
+            CommandManager.execute(Commands.CMD_OPEN, { fullPath: MainViewManager.traverseToNextViewByMRU(-1).file._path });
+        });
+        CodeMirror.Vim.defineEx("vsplit", "vs", function (cm) {
+            CommandManager.execute(Commands.CMD_SPLITVIEW_VERTICAL);
+        });
+        CodeMirror.Vim.defineEx("split", "sp", function (cm) {
+            CommandManager.execute(Commands.CMD_SPLITVIEW_HORIZONTAL);
+        });
+        CodeMirror.Vim.defineEx("only", "on", function (cm) {
+            CommandManager.execute(Commands.CMD_SPLITVIEW_NONE);
+        });
+    }
+
+    /**
      * Initialize Vimderbar plugin; setup menu, load vim.js from CodeMirror,
-     * setup css and html, hook Document change, apply VimFix, and init CommandDialog
+     * setup css and html, hook Document change, init StatusBar
      */
     function init() {
         // Register function as command
@@ -132,24 +202,23 @@ define(function (require, exports, module) {
         if (view_menu) {
             view_menu.addMenuItem(TOGGLE_VIMDERBAR_ID);
         }
-        PreferencesManager.on("change", setKeyBindings);
-        vimderbarPreferences.on("change", handleShowHideVimderbar);
-        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(vimderbarEnabled);
-
-        // Add the HTML UI
+        vimderbarPreferences.on("change", preferencesChange);
+        CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(vimderbarPreferences.get("enabled"));
         ExtensionUtils.loadStyleSheet(module, "styles/vimderbar.css");
-        $(".content").append(Mustache.render(panelHtml));
-        // keep vimderbar off by default
-        $vimderbar = $("#vimderbar");
-        $vimderbar.hide();
 
-        // import vim keymap from brackets source.
+        StatusBar.init();
+        EditorManager.on("activeEditorChange", handleEditorChange);
+
+        // Import vim keymap mode from brackets source
         brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
-            EditorManager.on("activeEditorChange", handleShowHideVimderbar);
+            setExCommands();
         });
     }
 
     AppInit.htmlReady(function () {
         init();
+    });
+    AppInit.appReady(function () {
+        preferencesChange();
     });
 });

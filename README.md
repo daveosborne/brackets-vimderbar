@@ -36,6 +36,12 @@ See [LICENSE.txt](LICENSE.txt)
 
 ## Changelog
 
+### 0.8.0
++ fix esc key handling code to work with Brackets 1.2 preview (Issue #36)
++ reorganize modules and file tree
++ refactor event handling and initialization
++ fix deprecated event syntax
+
 ### 0.7.2
 + removed some bad console output
 + cleanup README

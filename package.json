@@ -3,11 +3,11 @@
     "title": "Vimderbar",
     "description": "Adds vim-like functionality & status bar to Brackets.",
     "homepage": "https://github.com/daveosborne/brackets-vimderbar",
-    "version": "0.7.2",
+    "version": "0.8.0",
     "author": "daveosborne (https://github.com/daveosborne)",
     "contributors": ["fontface (https://github.com/fontface)"],
     "license": "MIT",
     "engines": {
-        "brackets": ">=1.0"
+        "brackets": ">=1.1"
     }
 }

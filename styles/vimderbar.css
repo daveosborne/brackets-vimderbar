@@ -1,12 +1,12 @@
 .vimderbar {
-    font-family: "SourceCodePro-Medium","ＭＳ ゴシック","MS Gothic",monospace;
     background: #2D2E30;
     color: #8fddff;
     display: block;
-    width: 100%;
+    font-family: "SourceCodePro-Medium","ＭＳ ゴシック","MS Gothic",monospace;
     height: 1.4em;
     overflow: hidden;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    width: 100%;
 }
 .vimderbar-mode {
     margin: 1px;
@@ -14,67 +14,67 @@
     text-transform: capitalize;
 }
 input.vimderbar-command {
-    font-family: "SourceCodePro-Medium","ＭＳ ゴシック","MS Gothic",monospace;
     color: #8fddff;
-    padding: 0;
-    margin: 0;
-    margin-top: -4px;
-    margin-left: -8px;
     display: none;
-    width: 90%;
+    font-family: "SourceCodePro-Medium","ＭＳ ゴシック","MS Gothic",monospace;
+    margin: 0;
+    margin-left: -8px;
+    margin-top: -4px;
+    padding: 0;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    width: 90%;
 }
 input.vimderbar-command:focus {
-    color: #8fddff;
     background: transparent !important;
     border: none !important;
     box-shadow: none;
+    color: #8fddff;
 }
 .vimderbar-command-sign {
-    margin-top: 3px;
-    margin-right: 0;
     margin-left: 10px;
+    margin-right: 0;
+    margin-top: 3px;
 }
 .vimderbar-command-keys {
     position: absolute;
     right: 10px;
 }
 .cm-searching {
-    color: #000000 !important;
     background: rgb(211, 205, 105);
+    color: #000000 !important;
 }
 .CodeMirror.cm-fat-cursor div.CodeMirror-cursors {
-  z-index: 3;
+    z-index: 3;
 }
 /* have to use an id selector here because of a global left border override somewhere in the brackets code (not a css file), also it's set as !important, so we have to use !imporant here too, this removes the border from the fat cursor */
 #editor-holder .CodeMirror.cm-fat-cursor div.CodeMirror-cursor {
-  border: none !important;
-  background: rgb(195, 195, 195);
-  background: rgba(195, 195, 195, 0.5); 
+    background: rgb(195, 195, 195);
+    background: rgba(195, 195, 195, 0.5);
+    border: none !important;
 }
 .cm-animate-fat-cursor {
-  -webkit-animation: vimderbar-blink 1.06s steps(1) infinite;
-  -moz-animation: vimderbar-blink 1.06s steps(1) infinite;
-  animation: vimderbar-blink 1.06s steps(1) infinite;
+    -webkit-animation: vimderbar-blink 1.06s steps(1) infinite;
+    -moz-animation: vimderbar-blink 1.06s steps(1) infinite;
+    animation: vimderbar-blink 1.06s steps(1) infinite;
 }
 @-moz-keyframes vimderbar-blink {
-  0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
-  50% { background: none; }
-  100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+    0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+    50% { background: none; }
+    100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
 }
 @-webkit-keyframes vimderbar-blink {
-  0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
-  50% { background: none; }
-  100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+    0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+    50% { background: none; }
+    100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
 }
 @keyframes vimderbar-blink {
-  0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
-  50% { background: none; }
-  100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+    0% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
+    50% { background: none; }
+    100% { background: rgb(195, 195, 195); background: rgba(195, 195, 195, 0.5); }
 }
 
 /* using admittedly insane selectors to avoid inline editor inheriting fat-cursor... made default color neutral */
 .CodeMirror.cm-fat-cursor .inline-text-editor .CodeMirror:not(.cm-fat-cursor) .CodeMirror-cursor {
-    border-left: 1px solid black;
     background: none;
+    border-left: 1px solid black;
 }

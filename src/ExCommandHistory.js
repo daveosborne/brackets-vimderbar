@@ -1,13 +1,15 @@
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, localStorage, $, brackets*/
+/*jslint vars: true, plusplus: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define, localStorage, $, brackets, console*/
 
 // holds vim ex commmand history in projectFile
 define(function (require, exports) {
     "use strict";
 
+    // Brackets modules
     var ProjectManager = brackets.getModule("project/ProjectManager");
     var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
     var vimderbarPreferences = PreferencesManager.getExtensionPrefs("vimderbar");
+    // State
     var commandHistory;
     var historyPosition;
     var currentProject;
@@ -16,13 +18,13 @@ define(function (require, exports) {
     // Persistence
     /**
      * @private
-     * Store current history in localStorage.
+     * Store current history in localStorage
      */
     function persistHistory() {
         localStorage.setItem("fontface.vimderbar.history." + currentProject, JSON.stringify(commandHistory));
     }
     /**
-     * Clear commandHistory.
+     * Clear commandHistory
      */
     function resetHistory() {
         commandHistory = [];
@@ -31,7 +33,7 @@ define(function (require, exports) {
     }
     /**
      * @private
-     * Retrieve current history from localStorage.
+     * Retrieve current history from localStorage
      */
     function fetchHistory() {
         historyPosition = -1;
@@ -50,8 +52,8 @@ define(function (require, exports) {
     // Housekeeping
     /**
      * @private
-     * Switch history to another project.
-     * @param {String} project Project full path, used as lookup key in localStorage.
+     * Switch history to another project
+     * @param {String} project Project full path, used as lookup key in localStorage
      */
     function changeProject(project) {
         if (useCommonVimHistory) {
@@ -63,8 +65,8 @@ define(function (require, exports) {
     }
     // Status Bar Interaction
     /**
-     * Add an ExCommand to history (prepend), reset history position, store history.
-     * @param {String} command ExCommand string to store in history.
+     * Add an ExCommand to history (prepend), reset history position, store history
+     * @param {String} command ExCommand string to store in history
      */
     function add(command) {
         var index = $.inArray(command, commandHistory);
@@ -76,8 +78,8 @@ define(function (require, exports) {
         persistHistory();
     }
     /**
-     * Get the previous ExCommand in history, move position index.
-     * @returns {String} ExCommand at new history position.
+     * Get the previous ExCommand in history, move position index
+     * @returns {String} ExCommand at new history position
      */
     function getPrevHistoryItem() {
         historyPosition++;
@@ -87,8 +89,8 @@ define(function (require, exports) {
         return commandHistory[historyPosition];
     }
     /**
-     * Get the next ExCommand in history, move position index.
-     * @returns {String} ExCommand at new history position.
+     * Get the next ExCommand in history, move position index
+     * @returns {String} ExCommand at new history position
      */
     function getNextHistoryItem() {
         historyPosition--;
@@ -105,12 +107,9 @@ define(function (require, exports) {
     }
 
     /**
-     * Get history preferences and change project history to current project.
+     * Get history preferences and change project history to current project
      */
     function init() {
-        useCommonVimHistory = vimderbarPreferences.get("commonHistory");
-        changeProject(ProjectManager.getProjectRoot().fullPath);
-
         ProjectManager.on("projectOpen", function () {
             changeProject(ProjectManager.getProjectRoot().fullPath);
         });
