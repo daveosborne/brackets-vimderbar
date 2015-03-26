@@ -32,21 +32,26 @@ define(function (require, exports) {
      */
     function openDialog(template, _callback, options) {
         callback = _callback;
-        // grab shortText out of the provided template
-        // TODO: this could be brittle, is the template format going to change?
-        var shortText = $(Mustache.render(template))[0].innerHTML;
-        if (shortText === null) { // dealing with Macros
-            $dialog.children(".vimderbar-mode").html(template);
+        if (/^\(recording\)/.test(template)) {
+            // call is from macro start
+            $dialog.children(".vimderbar-mode").text(template);
+            return function () {
+              updateVimStatus("Normal");
+            };
+        } else {
+            // call is from Ex dialog
+            // grab shortText out of the provided template
+            // TODO: this could be brittle, is the template format going to change?
+            var shortText = $(Mustache.render(template))[0].innerHTML;
+            if (typeof options.value !== "undefined") {
+                $input.val(options.value);
+            }
+            $input.show();
+            $input.focus();
+            $dialog.children(".vimderbar-command-sign").text(shortText[0]);
+            $dialog.children(".vimderbar-mode").hide();
             return;
         }
-        if (typeof options.value !== "undefined") {
-            $input.val(options.value);
-        }
-        $input.show();
-        $input.focus();
-        $dialog.children(".vimderbar-command-sign").text(shortText[0]);
-        $dialog.children(".vimderbar-mode").hide();
-        return;
     }
     /**
      * @private

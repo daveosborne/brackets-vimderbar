@@ -36,6 +36,9 @@ See [LICENSE.txt](LICENSE.txt)
 
 ## Changelog
 
+### 0.8.1
++ fix macro functionality, openDialog now handles entering macro mode (Issue #38)
+
 ### 0.8.0
 + fix esc key handling code to work with Brackets 1.2 preview (Issue #36)
 + reorganize modules and file tree
