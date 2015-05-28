@@ -36,6 +36,9 @@ See [LICENSE.txt](LICENSE.txt)
 
 ## Changelog
 
+### 0.9.0
++ now restricts code hinting to input mode (Issue #41)
+
 ### 0.8.1
 + fix macro functionality, openDialog now handles entering macro mode (Issue #38)
 

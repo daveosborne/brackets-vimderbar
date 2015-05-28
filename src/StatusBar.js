@@ -17,6 +17,7 @@ define(function (require, exports) {
     var callback;
     var $dialog;
     var $input;
+    var $mode;
     var inHistory;
 
     /**
@@ -70,6 +71,12 @@ define(function (require, exports) {
      */
     function onCommandDone() {
         CodeMirror.clearVimCommandKeys();
+        if ($mode !== "insert") {
+            // need to next-tick with a timeout so the hinter knows it's open
+            setTimeout(function () {
+                CommandManager.trigger("beforeExecuteCommand");
+            }, 0);
+        }
     }
     /**
      * @private
@@ -89,6 +96,7 @@ define(function (require, exports) {
      */
     function updateMode(e) {
         updateVimStatus(e.mode);
+        $mode = e.mode;
     }
     /**
      * @private
@@ -204,6 +212,7 @@ define(function (require, exports) {
         ExCommandHistory.init();
         $dialog.children(".vimderbar-mode").show();
         $dialog.children(".vimderbar-mode").text("-- Normal --");
+        $mode = "normal";
     }
 
     exports.init = init;
