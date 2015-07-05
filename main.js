@@ -43,12 +43,13 @@ define(function (require, exports, module) {
      * @param {CodeMirror} cm Current CodeMirror editor instance
      */
     function setKeyBindings(cm) {
-        var extraKeys = vimderbarPreferences.get("extraKeys") || {};
         cm.setOption("tabSize", PreferencesManager.get("tabSize"));
         if (!PreferencesManager.get("useTabChar")) {
             cm.setOption("indentWithTabs", false);
-            extraKeys.Tab = function (cm) {
-                cm.replaceSelection(getTabSpaces());
+            var extraKeys = { 
+                Tab: function (cm) {
+                    cm.replaceSelection(getTabSpaces());
+                }
             };
             cm.setOption("extraKeys", extraKeys);
         } else {
@@ -85,6 +86,7 @@ define(function (require, exports, module) {
         cm.setOption("keyMap", "vim");
         cm.setOption("vimMode", true);
         $("#vimderbar").show();
+        WorkspaceManager.recomputeLayout();
     }
     /**
      * @private
@@ -125,7 +127,6 @@ define(function (require, exports, module) {
                 disableVimderbar(cm);
                 CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
             }
-            WorkspaceManager.recomputeLayout();
         }
     }
     /**
@@ -211,6 +212,12 @@ define(function (require, exports, module) {
 
         // Import vim keymap mode from brackets source
         brackets.libRequire(["thirdparty/CodeMirror2/keymap/vim"], function () {
+            var mappings = vimderbarPreferences.get("mappings") || [];
+            if (mappings) {
+                for (var i = 0; i < mappings.length; i++) {
+                    CodeMirror.Vim.map(mappings[i].keys, mappings[i].toKeys, mappings[i].mode);
+                }
+            }
             setExCommands();
         });
     }

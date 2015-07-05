@@ -13,11 +13,12 @@ All of the Vim keymapping is from [CodeMirror](http://codemirror.net)'s `keymap/
 ## Configuration
 
 ### Keybindings
-+ Add custom keybindings in Brackets preferences with `vimderbar.extraKeys = keyMap` (http://codemirror.net/doc/manual.html#keymaps)
-  + Function based bindings are not supported, as the preferences are in json.
++ Add custom keybindings in Brackets preferences with `vimderbar.mappings: [maps]`
+  + format of map: {"keys": "", "toKeys": "", "mode": ""}
+  + mode is one of insert, visual, normal
 
 ### Command Mode History
-+ Default history is per-project, enable common history in Brackets preferences with `vimderbar.commonHistory = true`
++ Default history is per-project, enable common history in Brackets preferences with `vimderbar.commonHistory: true`
 
 ## Features
 + `:vs`, `:sp` and `:on` hook Brackets split screen functionality.
@@ -35,6 +36,10 @@ All of the Vim keymapping is from [CodeMirror](http://codemirror.net)'s `keymap/
 See [LICENSE.txt](LICENSE.txt)
 
 ## Changelog
+
+### 0.10.0
++ replaced vimderbar.extraKeys in preferences with vimderbar.mappings
+  + now uses CodeMirror.Vim.map() for key mappings
 
 ### 0.9.0
 + now restricts code hinting to input mode (Issue #41)
