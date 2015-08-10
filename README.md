@@ -21,7 +21,7 @@ All of the Vim keymapping is from [CodeMirror](http://codemirror.net)'s `keymap/
 + Default history is per-project, enable common history in Brackets preferences with `vimderbar.commonHistory: true`
 
 ### Switch Panes Override
-+ Add `"vimderbar.switchPanes": true` to Brackets preferences to switch panes with Ctrl-W
++ Bind `"view.toggleActivePane"` in your overrides keymap.json to switch panes
   
 ## Features
 + `:vs`, `:sp` and `:on` hook Brackets split screen functionality.
@@ -40,8 +40,11 @@ See [LICENSE.txt](LICENSE.txt)
 
 ## Changelog
 
+### 0.11.1
++ Changed switch pane to use Brackets keymap
+
 ### 0.11.0
-+ Added Ctrl-W binding for switching active pane in split mode
++ Added binding for switching active pane in split mode
   + Overrides default File->Close shortcut
 
 ### 0.10.0

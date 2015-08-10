@@ -20,10 +20,6 @@ define(function (require, exports, module) {
     var StatusBar = require("./src/StatusBar");
     // Preferences
     var vimderbarPreferences = PreferencesManager.getExtensionPrefs("vimderbar");
-    var vimderbarEnabled = vimderbarPreferences.get("enabled");
-    var editorSpaces = PreferencesManager.get("spaceUnits");
-    var useTabChar = PreferencesManager.get("useTabChar");
-    var tabSize = PreferencesManager.get("tabSize");
     // Constants
     var TOGGLE_VIMDERBAR_ID = "view.enableVimderbar";
     var TOGGLE_ACTIVE_PANE = "view.toggleActivePane";
@@ -129,14 +125,6 @@ define(function (require, exports, module) {
                 disableVimderbar(cm);
                 CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
             }
-        }
-        // Switch active pane shortcut
-        if (vimderbarPreferences.get("switchPanes")) {
-            KeyBindingManager.removeBinding("Ctrl-W");
-            KeyBindingManager.addBinding(TOGGLE_ACTIVE_PANE, "Ctrl-W");
-        } else {
-            KeyBindingManager.removeBinding("Ctrl-W");
-            KeyBindingManager.addBinding("file.close", "Ctrl-W");
         }
     }
     /**
