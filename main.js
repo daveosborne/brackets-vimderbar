@@ -15,6 +15,7 @@ define(function (require, exports, module) {
     var Menus = brackets.getModule("command/Menus");
     var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
     var WorkspaceManager = brackets.getModule("view/WorkspaceManager");
+    var KeyBindingManager = brackets.getModule("command/KeyBindingManager");
     // Local modules
     var StatusBar = require("./src/StatusBar");
     // Preferences
@@ -25,6 +26,7 @@ define(function (require, exports, module) {
     var tabSize = PreferencesManager.get("tabSize");
     // Constants
     var TOGGLE_VIMDERBAR_ID = "view.enableVimderbar";
+    var TOGGLE_ACTIVE_PANE = "view.toggleActivePane";
 
     /**
      * @private
@@ -46,7 +48,7 @@ define(function (require, exports, module) {
         cm.setOption("tabSize", PreferencesManager.get("tabSize"));
         if (!PreferencesManager.get("useTabChar")) {
             cm.setOption("indentWithTabs", false);
-            var extraKeys = { 
+            var extraKeys = {
                 Tab: function (cm) {
                     cm.replaceSelection(getTabSpaces());
                 }
@@ -108,7 +110,7 @@ define(function (require, exports, module) {
         if (lostFocus) {
             disableVimderbar(lostFocus._codeMirror);
         }
-        if (vimderbarPreferences.get("enabled")) {
+        if (vimderbarPreferences.get("enabled") && focused) {
             enableVimderbar(focused._codeMirror);
         }
     }
@@ -127,6 +129,14 @@ define(function (require, exports, module) {
                 disableVimderbar(cm);
                 CommandManager.get(TOGGLE_VIMDERBAR_ID).setChecked(false);
             }
+        }
+        // Switch active pane shortcut
+        if (vimderbarPreferences.get("switchPanes")) {
+            KeyBindingManager.removeBinding("Ctrl-W");
+            KeyBindingManager.addBinding(TOGGLE_ACTIVE_PANE, "Ctrl-W");
+        } else {
+            KeyBindingManager.removeBinding("Ctrl-W");
+            KeyBindingManager.addBinding("file.close", "Ctrl-W");
         }
     }
     /**
@@ -198,6 +208,13 @@ define(function (require, exports, module) {
     function init() {
         // Register function as command
         CommandManager.register("Enable Vimderbar", TOGGLE_VIMDERBAR_ID, toggleActive);
+        // Switch active pane
+        CommandManager.register("Switch Pane", TOGGLE_ACTIVE_PANE, function () {
+            var activePaneId = MainViewManager.getActivePaneId();
+            var paneIdList = MainViewManager.getPaneIdList();
+            var found = paneIdList.indexOf(activePaneId);
+            MainViewManager.setActivePaneId(paneIdList[paneIdList.length - 1 - found]);
+        });
         // Add command to View menu, if it exists
         var view_menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
         if (view_menu) {

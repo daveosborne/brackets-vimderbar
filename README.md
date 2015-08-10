@@ -20,6 +20,9 @@ All of the Vim keymapping is from [CodeMirror](http://codemirror.net)'s `keymap/
 ### Command Mode History
 + Default history is per-project, enable common history in Brackets preferences with `vimderbar.commonHistory: true`
 
+### Switch Panes Override
++ Add `"vimderbar.switchPanes": true` to Brackets preferences to switch panes with Ctrl-W
+  
 ## Features
 + `:vs`, `:sp` and `:on` hook Brackets split screen functionality.
 + Basic vim keybindings (`hjkl`, `yy`, `dd`, `p`, `P`, `o`, `O`, `gg`, `G`, etc).
@@ -37,30 +40,34 @@ See [LICENSE.txt](LICENSE.txt)
 
 ## Changelog
 
+### 0.11.0
++ Added Ctrl-W binding for switching active pane in split mode
+  + Overrides default File->Close shortcut
+
 ### 0.10.0
-+ replaced vimderbar.extraKeys in preferences with vimderbar.mappings
-  + now uses CodeMirror.Vim.map() for key mappings
++ Replaced vimderbar.extraKeys in preferences with vimderbar.mappings
+  + Now uses CodeMirror.Vim.map() for key mappings
 
 ### 0.9.0
-+ now restricts code hinting to input mode (Issue #41)
++ Now restricts code hinting to input mode (Issue #41)
 
 ### 0.8.1
-+ fix macro functionality, openDialog now handles entering macro mode (Issue #38)
++ Fix macro functionality, openDialog now handles entering macro mode (Issue #38)
 
 ### 0.8.0
-+ fix esc key handling code to work with Brackets 1.2 preview (Issue #36)
-+ reorganize modules and file tree
-+ refactor event handling and initialization
-+ fix deprecated event syntax
++ Fix esc key handling code to work with Brackets 1.2 preview (Issue #36)
++ Reorganize modules and file tree
++ Refactor event handling and initialization
++ Fix deprecated event syntax
 
 ### 0.7.2
-+ removed some bad console output
-+ cleanup README
++ Removed some bad console output
++ Cleanup README
 
 ### 0.7.1
-+ changed Vimderbar enable command to 'view.enableVimderbar'
-+ cleaned up enable/disable logic and editor switching logic
-+ added css to override CodeMirror default colors
++ Changed Vimderbar enable command to 'view.enableVimderbar'
++ Cleaned up enable/disable logic and editor switching logic
++ Added css to override CodeMirror default colors
 
 ## Contributing
 Please do, by all means, hack on this extension and send me PRs. For coding conventions, review the [Brackets Coding Conventions](https://github.com/adobe/brackets/wiki/Brackets%20Coding%20Conventions).
